@@ -1,0 +1,242 @@
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ArrowRight } from 'lucide-react';
+import SectionLabel from '../ui/SectionLabel';
+
+const HEADLINE =
+  'Descubra em 10 minutos o que falta para o seu município ter um Fundo do Idoso';
+
+function wrapWordsPreservingMarkup(root: HTMLElement, wordClass: string) {
+  if (root.dataset.split === '1') return;
+  const walk = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? '';
+      if (!text.trim()) return;
+      const parts = text.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      parts.forEach((p) => {
+        if (!p) return;
+        if (/^\s+$/.test(p)) {
+          frag.appendChild(document.createTextNode(p));
+        } else {
+          const span = document.createElement('span');
+          span.className = `word-anim ${wordClass}`;
+          span.style.display = 'inline-block';
+          span.textContent = p;
+          frag.appendChild(span);
+        }
+      });
+      node.parentNode?.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  };
+  Array.from(root.childNodes).forEach(walk);
+  root.dataset.split = '1';
+}
+
+export default function FinalCTA() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const headlineRef = useRef<HTMLHeadingElement | null>(null);
+  const subRef = useRef<HTMLParagraphElement | null>(null);
+  const ctasRef = useRef<HTMLDivElement | null>(null);
+  const blobRef = useRef<HTMLDivElement | null>(null);
+  const primaryRef = useRef<HTMLAnchorElement | null>(null);
+  const secondaryRef = useRef<HTMLAnchorElement | null>(null);
+  const secondaryFillRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Split headline into words (preserves highlight markup)
+      if (headlineRef.current) {
+        wrapWordsPreservingMarkup(headlineRef.current, 'final-word');
+      }
+
+      gsap.set('.final-word', { y: 30, autoAlpha: 0 });
+      gsap.set(subRef.current, { y: 20, autoAlpha: 0 });
+      gsap.set(ctasRef.current?.children ?? [], {
+        scale: 0.8,
+        autoAlpha: 0,
+      });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 70%',
+          toggleActions: 'play none none reverse',
+        },
+        defaults: { ease: 'power3.out' },
+      });
+      tl.to('.final-word', {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.85,
+        stagger: 0.05,
+      })
+        .to(
+          subRef.current,
+          { y: 0, autoAlpha: 1, duration: 0.8 },
+          '-=0.4',
+        )
+        .to(
+          ctasRef.current?.children ?? [],
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: 'expo.out',
+          },
+          '-=0.3',
+        );
+
+      // Parallax blob
+      if (blobRef.current) {
+        gsap.to(blobRef.current, {
+          y: 60,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.2,
+          },
+        });
+      }
+
+      // Button hovers (custom for this dark section — different palette)
+      if (window.innerWidth >= 768) {
+        if (primaryRef.current) {
+          const el = primaryRef.current;
+          const base = window.getComputedStyle(el).boxShadow;
+          el.addEventListener('pointerenter', () =>
+            gsap.to(el, {
+              scale: 1.04,
+              boxShadow: '0 14px 32px rgba(0,0,0,0.28)',
+              duration: 0.3,
+              ease: 'power2.out',
+            }),
+          );
+          el.addEventListener('pointerleave', () =>
+            gsap.to(el, {
+              scale: 1,
+              boxShadow: base,
+              duration: 0.3,
+              ease: 'power2.out',
+            }),
+          );
+        }
+        if (secondaryRef.current && secondaryFillRef.current) {
+          const el = secondaryRef.current;
+          const fill = secondaryFillRef.current;
+          const label = el.querySelector('.btn-label-final');
+          el.addEventListener('pointerenter', () => {
+            gsap.to(fill, {
+              scaleX: 1,
+              duration: 0.45,
+              ease: 'power3.out',
+            });
+            gsap.to(label, {
+              color: '#0C4A8C',
+              duration: 0.3,
+              ease: 'power2.out',
+            });
+          });
+          el.addEventListener('pointerleave', () => {
+            gsap.to(fill, {
+              scaleX: 0,
+              duration: 0.4,
+              ease: 'power3.in',
+            });
+            gsap.to(label, {
+              color: '#ffffff',
+              duration: 0.3,
+              ease: 'power2.out',
+            });
+          });
+        }
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      id="cta-final"
+      ref={sectionRef}
+      aria-labelledby="cta-final-heading"
+      className="relative py-[140px] lg:py-[160px] overflow-hidden"
+      style={{ backgroundColor: '#0D1B2A' }}
+    >
+      <div
+        ref={blobRef}
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 700px 500px at 50% 40%, rgba(255,255,255,0.08), transparent 70%)',
+        }}
+      />
+
+      <div className="container-x relative">
+        <div className="max-w-3xl mx-auto text-center">
+          <SectionLabel tone="neutral" className="!text-white/70">
+            Comece agora
+          </SectionLabel>
+          <h2
+            ref={headlineRef}
+            id="cta-final-heading"
+            className="mt-5 text-[36px] sm:text-[44px] lg:text-[52px] font-bold leading-[1.1] tracking-[-0.02em] text-white"
+            style={{ fontWeight: 700 }}
+          >
+            Descubra em{' '}
+            <span className="text-yellow-400 font-extrabold">10 minutos</span>{' '}
+            o que falta para o seu município ter um Fundo do Idoso
+          </h2>
+          <p
+            ref={subRef}
+            className="mt-7 text-[17px] leading-[1.7] text-white/85 max-w-2xl mx-auto"
+          >
+            O diagnóstico é gratuito, leva menos de 10 minutos e entrega um
+            relatório completo com análise da situação atual, pontos de atenção
+            e um caminho claro para a implementação.
+          </p>
+
+          <div
+            ref={ctasRef}
+            className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
+            <a
+              ref={primaryRef}
+              href="/diagnostico"
+              className="inline-flex items-center justify-center gap-2 rounded-pill px-8 min-h-[52px] py-[15px] font-medium text-[16px] bg-white text-blue-deep cursor-pointer will-change-transform shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+            >
+              Iniciar Diagnóstico Gratuito
+              <ArrowRight size={18} aria-hidden="true" />
+            </a>
+            <a
+              ref={secondaryRef}
+              href="/contato"
+              className="relative isolate inline-flex items-center justify-center rounded-pill px-8 min-h-[52px] py-[15px] font-medium text-[16px] cursor-pointer overflow-hidden"
+              style={{ border: '2px solid rgba(255,255,255,0.85)' }}
+            >
+              <span
+                ref={secondaryFillRef}
+                aria-hidden="true"
+                className="absolute inset-0 bg-white origin-left -z-10"
+                style={{ transform: 'scaleX(0)' }}
+              />
+              <span
+                className="btn-label-final relative z-10 inline-flex items-center gap-2 text-white"
+              >
+                Prefere falar com um especialista? Entre em contato
+                <ArrowRight size={18} aria-hidden="true" />
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
