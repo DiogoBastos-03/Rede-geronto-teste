@@ -104,23 +104,23 @@ export default function CityFriendly() {
       id="cidade-amiga"
       ref={sectionRef}
       aria-labelledby="cidade-amiga-heading"
-      className="py-[120px] lg:py-[140px]"
+      className="py-[120px] lg:py-[140px] overflow-hidden w-full"
       style={{ backgroundColor: '#F0F7FF' }}
     >
-      <div className="container-x">
+      <div className="container-x max-w-full px-4 sm:px-6">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          <div ref={leftRef} className="lg:col-span-6">
+          <div ref={leftRef} className="lg:col-span-6 min-w-0">
             <SectionLabel tone="green">Cidade Amiga do Idoso</SectionLabel>
             <h2
               id="cidade-amiga-heading"
-              className="mt-5 text-[32px] sm:text-[40px] lg:text-[44px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
+              className="mt-5 text-[28px] sm:text-[40px] lg:text-[44px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary break-words hyphens-auto"
             >
               O fundo é o começo. A Cidade Amiga do Idoso é o{' '}
               <em className="font-serif italic text-green-water font-normal">
                 destino.
               </em>
             </h2>
-            <div className="mt-6 space-y-5 text-[17px] leading-[1.7] text-text-secondary">
+            <div className="mt-6 space-y-5 text-[16px] sm:text-[17px] leading-[1.7] text-text-secondary break-words">
               <p>
                 Municípios com recursos estruturados podem ir além — e
                 transformar o jeito como a cidade inteira se relaciona com a
@@ -133,15 +133,20 @@ export default function CityFriendly() {
                 financeira e institucional para embarcar nessa jornada.
               </p>
             </div>
-            <div className="mt-10">
-              <Button href="/cidade-amiga" variant="green" size="lg">
+            <div className="mt-10 max-w-full">
+              <Button
+                href="/cidade-amiga"
+                variant="green"
+                size="lg"
+                className="max-w-full !whitespace-normal text-center sm:!whitespace-nowrap"
+              >
                 Conheça o programa Cidade Amiga do Idoso
                 <ArrowRight size={18} aria-hidden="true" />
               </Button>
             </div>
           </div>
 
-          <div ref={rightRef} className="lg:col-span-6">
+          <div ref={rightRef} className="lg:col-span-6 min-w-0">
             <div
               className="rounded-[20px] p-7 lg:p-9 bg-white"
               style={{
