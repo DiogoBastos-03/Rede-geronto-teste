@@ -43,7 +43,8 @@
       "Bash(curl -s -o /dev/null -w \"/consultoria   HTTP %{http_code}\\\\n\" http://localhost:5174/consultoria)",
       "Bash(curl -s -o /dev/null -w \"PageHeader.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/components/layout/PageHeader.tsx\")",
       "Bash(curl -s -o /dev/null -w \"CidadeAmiga.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/pages/CidadeAmiga.tsx\")",
-      "Bash(curl -s -o /dev/null -w \"Consultoria.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/pages/Consultoria.tsx\")"
+      "Bash(curl -s -o /dev/null -w \"Consultoria.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/pages/Consultoria.tsx\")",
+      "Bash(npm uninstall *)"
     ]
   }
 }
