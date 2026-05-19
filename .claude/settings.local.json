@@ -44,7 +44,11 @@
       "Bash(curl -s -o /dev/null -w \"PageHeader.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/components/layout/PageHeader.tsx\")",
       "Bash(curl -s -o /dev/null -w \"CidadeAmiga.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/pages/CidadeAmiga.tsx\")",
       "Bash(curl -s -o /dev/null -w \"Consultoria.tsx HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/pages/Consultoria.tsx\")",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(curl -s -o /dev/null -w \"Hero.tsx      HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/components/sections/Hero.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"/             HTTP %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"Hero.tsx      HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/Hero.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"elderly.svg   HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/assets/elderly.svg\")"
     ]
   }
 }

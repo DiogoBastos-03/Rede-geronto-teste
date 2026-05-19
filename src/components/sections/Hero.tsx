@@ -190,13 +190,13 @@ export default function Hero() {
         }}
       />
 
-      <div className="container-x relative">
-        <div className="grid md:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[560px] md:min-h-[640px]">
+      <div className="container mx-auto px-6 lg:px-8 max-w-[1280px] relative">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Illustration — desktop/tablet */}
-          <div className="hidden md:block md:col-span-6 lg:col-span-7 relative">
+          <div className="hidden md:flex items-center justify-center">
             <div
               ref={canvasWrapRef}
-              className="hidden md:flex items-center justify-center will-change-transform"
+              className="will-change-transform flex items-center justify-center w-full"
             >
               <img
                 src={elderlySvg}
@@ -220,7 +220,7 @@ export default function Hero() {
           </div>
 
           {/* Hero content */}
-          <div className="md:col-span-6 lg:col-span-5">
+          <div className="flex flex-col justify-center">
             <span ref={labelRef} className="inline-block">
               <SectionLabel>Rede Geronto</SectionLabel>
             </span>
