@@ -112,11 +112,10 @@ export default function Hero() {
       id="hero"
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden [background-position:30%_center] md:[background-position:center_center]"
       style={{
         backgroundImage: `url(${heroImage})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }}
     >

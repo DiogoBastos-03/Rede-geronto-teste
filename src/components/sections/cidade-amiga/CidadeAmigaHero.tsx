@@ -1,19 +1,11 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Globe,
-  Heart,
-  Users,
-  Building2,
-  Bus,
-  Home as HomeIcon,
-} from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import Button from '../../ui/Button';
 import SectionLabel from '../../ui/SectionLabel';
 import { wrapWordsPreservingMarkup } from '../../../utils/wrapWords';
+import cidadeAmigaImg from '../../../assets/cidadeAmiga.svg';
 
 export default function CidadeAmigaHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -171,6 +163,17 @@ export default function CidadeAmigaHero() {
       />
 
       <div className="container-x relative">
+        {/* Mobile illustration */}
+        <div className="md:hidden flex justify-center mb-6">
+          <img
+            src={cidadeAmigaImg}
+            alt=""
+            aria-hidden="true"
+            className="w-56 h-auto"
+            loading="eager"
+          />
+        </div>
+
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center min-h-[520px]">
           {/* Text column */}
           <div className="lg:col-span-7">
@@ -228,81 +231,22 @@ export default function CidadeAmigaHero() {
             </div>
           </div>
 
-          {/* Decorative icon composition column */}
+          {/* SVG illustration column */}
           <div
-            className="lg:col-span-5 relative hidden md:block"
+            className="lg:col-span-5 hidden md:flex items-center justify-center"
             aria-hidden="true"
           >
             <div
               ref={visualRef}
-              className="relative mx-auto w-full max-w-[480px] aspect-square"
+              className="will-change-transform w-full flex items-center justify-center"
             >
-              {/* Center large card */}
-              <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 lg:w-32 lg:h-32 rounded-full flex items-center justify-center"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(12,74,140,0.10), rgba(26,122,94,0.10))',
-                  border: '1px solid rgba(12,74,140,0.18)',
-                  boxShadow: '0 8px 32px rgba(12,74,140,0.10)',
-                }}
-              >
-                <Globe size={48} className="text-blue-deep" />
-              </div>
-
-              {/* Top */}
-              <IconBubble
-                className="left-1/2 top-[6%] -translate-x-1/2"
-                size="md"
-                tone="green"
-              >
-                <Heart size={26} />
-              </IconBubble>
-
-              {/* Right */}
-              <IconBubble
-                className="right-[4%] top-[28%]"
-                size="lg"
-                tone="blue"
-              >
-                <Users size={32} />
-              </IconBubble>
-
-              {/* Bottom right */}
-              <IconBubble
-                className="right-[10%] bottom-[10%]"
-                size="sm"
-                tone="green"
-              >
-                <Bus size={22} />
-              </IconBubble>
-
-              {/* Bottom */}
-              <IconBubble
-                className="left-1/2 bottom-[4%] -translate-x-1/2"
-                size="md"
-                tone="blue"
-              >
-                <Building2 size={26} />
-              </IconBubble>
-
-              {/* Bottom left */}
-              <IconBubble
-                className="left-[8%] bottom-[18%]"
-                size="lg"
-                tone="green"
-              >
-                <HomeIcon size={30} />
-              </IconBubble>
-
-              {/* Left */}
-              <IconBubble
-                className="left-[4%] top-[30%]"
-                size="sm"
-                tone="blue"
-              >
-                <Globe size={20} />
-              </IconBubble>
+              <img
+                src={cidadeAmigaImg}
+                alt=""
+                aria-hidden="true"
+                className="w-full max-w-[480px] h-auto"
+                loading="eager"
+              />
             </div>
           </div>
         </div>
@@ -311,46 +255,3 @@ export default function CidadeAmigaHero() {
   );
 }
 
-type BubbleTone = 'blue' | 'green';
-type BubbleSize = 'sm' | 'md' | 'lg';
-
-interface BubbleProps {
-  className?: string;
-  tone: BubbleTone;
-  size: BubbleSize;
-  children: React.ReactNode;
-}
-
-function IconBubble({ className = '', tone, size, children }: BubbleProps) {
-  const dims = {
-    sm: 'w-14 h-14',
-    md: 'w-16 h-16',
-    lg: 'w-20 h-20',
-  }[size];
-  const toneStyle: React.CSSProperties =
-    tone === 'blue'
-      ? {
-          backgroundColor: 'rgba(12,74,140,0.08)',
-          border: '1px solid rgba(12,74,140,0.12)',
-          color: '#0C4A8C',
-        }
-      : {
-          backgroundColor: 'rgba(26,122,94,0.08)',
-          border: '1px solid rgba(26,122,94,0.14)',
-          color: '#1A7A5E',
-        };
-  return (
-    <div
-      className={`absolute ${dims} rounded-full flex items-center justify-center ${className}`}
-      style={{
-        ...toneStyle,
-        boxShadow:
-          tone === 'blue'
-            ? '0 4px 16px rgba(12,74,140,0.10)'
-            : '0 4px 16px rgba(26,122,94,0.10)',
-      }}
-    >
-      {children}
-    </div>
-  );
-}

@@ -1,54 +1,11 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Users, Award, BookOpen, Network } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Button from '../../ui/Button';
 import SectionLabel from '../../ui/SectionLabel';
 import { wrapWordsPreservingMarkup } from '../../../utils/wrapWords';
-
-interface FloatingBubble {
-  Icon: typeof Users;
-  size: number; // diameter in px
-  position: string; // tailwind absolute classes for position
-  tone: 'blue' | 'green';
-  delay: number;
-  iconSize: number;
-}
-
-const bubbles: FloatingBubble[] = [
-  {
-    Icon: Users,
-    size: 96,
-    position: 'top-[6%] right-[12%]',
-    tone: 'blue',
-    delay: 0,
-    iconSize: 36,
-  },
-  {
-    Icon: Award,
-    size: 72,
-    position: 'top-[34%] right-[42%]',
-    tone: 'green',
-    delay: 0.4,
-    iconSize: 28,
-  },
-  {
-    Icon: BookOpen,
-    size: 80,
-    position: 'bottom-[14%] right-[8%]',
-    tone: 'blue',
-    delay: 0.8,
-    iconSize: 30,
-  },
-  {
-    Icon: Network,
-    size: 64,
-    position: 'bottom-[40%] right-[60%]',
-    tone: 'green',
-    delay: 1.2,
-    iconSize: 24,
-  },
-];
+import consultaImg from '../../../assets/consulta.svg';
 
 export default function ConsultoriaHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -80,10 +37,7 @@ export default function ConsultoriaHero() {
       gsap.set(ctaRef.current?.children ?? [], { scale: 0.8, autoAlpha: 0 });
       gsap.set(blobBlueRef.current, { autoAlpha: 0, scale: 0.85 });
       gsap.set(blobGreenRef.current, { autoAlpha: 0, scale: 0.85 });
-      const bubbleEls = Array.from(
-        visualRef.current?.querySelectorAll('[data-bubble]') ?? [],
-      );
-      gsap.set(bubbleEls, { scale: 0.6, autoAlpha: 0 });
+      gsap.set(visualRef.current, { x: 100, autoAlpha: 0 });
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       tl.to(overlayRef.current, {
@@ -98,14 +52,8 @@ export default function ConsultoriaHero() {
         )
         .to(labelRef.current, { y: 0, autoAlpha: 1, duration: 0.8 }, 0.3)
         .to(
-          bubbleEls,
-          {
-            scale: 1,
-            autoAlpha: 1,
-            duration: 0.9,
-            stagger: 0.12,
-            ease: 'expo.out',
-          },
+          visualRef.current,
+          { x: 0, autoAlpha: 1, duration: 1.2, ease: 'expo.out' },
           0.8,
         )
         .to(
@@ -131,18 +79,6 @@ export default function ConsultoriaHero() {
           },
           1.4,
         );
-
-      // Floating loop on bubbles — each card with its own delay
-      bubbleEls.forEach((el, i) => {
-        gsap.to(el, {
-          y: -8,
-          duration: 3,
-          yoyo: true,
-          repeat: -1,
-          ease: 'sine.inOut',
-          delay: bubbles[i]?.delay ?? 0,
-        });
-      });
 
       if (!isMobile) {
         gsap.to(blobBlueRef.current, {
@@ -220,6 +156,17 @@ export default function ConsultoriaHero() {
       />
 
       <div className="container-x relative">
+        {/* Mobile illustration */}
+        <div className="md:hidden flex justify-center mb-6">
+          <img
+            src={consultaImg}
+            alt=""
+            aria-hidden="true"
+            className="w-56 h-auto"
+            loading="eager"
+          />
+        </div>
+
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center min-h-[520px]">
           {/* Text column */}
           <div className="lg:col-span-7">
@@ -267,45 +214,22 @@ export default function ConsultoriaHero() {
             </div>
           </div>
 
-          {/* Decorative floating bubbles */}
+          {/* SVG illustration column */}
           <div
-            className="lg:col-span-5 relative hidden md:block"
+            className="lg:col-span-5 hidden md:flex items-center justify-center"
             aria-hidden="true"
           >
             <div
               ref={visualRef}
-              className="relative mx-auto w-full max-w-[480px] aspect-square"
+              className="will-change-transform w-full flex items-center justify-center"
             >
-              {bubbles.map(({ Icon, size, position, tone, iconSize }, i) => {
-                const toneStyle: React.CSSProperties =
-                  tone === 'blue'
-                    ? {
-                        backgroundColor: 'rgba(12,74,140,0.06)',
-                        border: '1px solid rgba(12,74,140,0.10)',
-                        color: '#0C4A8C',
-                        boxShadow: '0 8px 24px rgba(12,74,140,0.10)',
-                      }
-                    : {
-                        backgroundColor: 'rgba(26,122,94,0.06)',
-                        border: '1px solid rgba(26,122,94,0.12)',
-                        color: '#1A7A5E',
-                        boxShadow: '0 8px 24px rgba(26,122,94,0.10)',
-                      };
-                return (
-                  <div
-                    key={i}
-                    data-bubble
-                    className={`absolute rounded-full flex items-center justify-center will-change-transform ${position}`}
-                    style={{
-                      width: `${size}px`,
-                      height: `${size}px`,
-                      ...toneStyle,
-                    }}
-                  >
-                    <Icon size={iconSize} aria-hidden="true" />
-                  </div>
-                );
-              })}
+              <img
+                src={consultaImg}
+                alt=""
+                aria-hidden="true"
+                className="w-full max-w-[480px] h-auto"
+                loading="eager"
+              />
             </div>
           </div>
         </div>

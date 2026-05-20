@@ -82,7 +82,7 @@ export default function Header() {
       ref={headerRef}
       className="fixed top-0 left-0 right-0 w-full z-50"
       style={{
-        background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.50)",
+        background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.20)",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled
