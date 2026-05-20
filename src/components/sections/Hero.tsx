@@ -4,11 +4,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import Button from '../ui/Button';
 import SectionLabel from '../ui/SectionLabel';
-import elderlySvg from '../../assets/elderly.svg';
+import heroImage from '../../assets/heroGerontoEdit.png';
 
 /**
  * Recursively wrap each word in a text node with a span (for stagger anim),
- * while preserving existing element children (e.g. highlight spans).
+ * preserving existing element children (e.g. gradient highlight spans).
  */
 function wrapWordsPreservingMarkup(root: HTMLElement) {
   if (root.dataset.split === '1') return;
@@ -40,113 +40,65 @@ function wrapWordsPreservingMarkup(root: HTMLElement) {
 }
 
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const canvasWrapRef = useRef<HTMLDivElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const blobBlueRef = useRef<HTMLDivElement | null>(null);
-  const blobGreenRef = useRef<HTMLDivElement | null>(null);
-  const labelRef = useRef<HTMLSpanElement | null>(null);
+  const sectionRef  = useRef<HTMLElement | null>(null);
+  const overlayRef  = useRef<HTMLDivElement | null>(null);
+  const labelRef    = useRef<HTMLSpanElement | null>(null);
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
-  const subRef = useRef<HTMLParagraphElement | null>(null);
-  const ctaRef = useRef<HTMLDivElement | null>(null);
+  const subRef      = useRef<HTMLParagraphElement | null>(null);
+  const ctaRef      = useRef<HTMLDivElement | null>(null);
   const solutionRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // Wrap each word of the headline in span for stagger (preserves highlight markup)
+      // Word-split headline preserving gradient <span>
       const textSpan = headlineRef.current?.querySelector(
         '.headline-text',
       ) as HTMLElement | null;
       if (textSpan) wrapWordsPreservingMarkup(textSpan);
 
-      // Initial states
-      gsap.set(canvasWrapRef.current, { x: 100, autoAlpha: 0 });
-      gsap.set(labelRef.current, { y: 24, autoAlpha: 0 });
-      gsap.set('.word-anim', { y: 30, autoAlpha: 0 });
-      gsap.set(subRef.current, { y: 16, autoAlpha: 0 });
-      gsap.set(ctaRef.current, { scale: 0.8, autoAlpha: 0 });
-      gsap.set(blobBlueRef.current, { autoAlpha: 0, scale: 0.85 });
-      gsap.set(blobGreenRef.current, { autoAlpha: 0, scale: 0.85 });
-      gsap.set(solutionRef.current, { autoAlpha: 0 });
+      // Initial hidden states
+      gsap.set(labelRef.current,    { y: 24, autoAlpha: 0 });
+      gsap.set('.word-anim',        { y: 30, autoAlpha: 0 });
+      gsap.set(subRef.current,      { y: 16, autoAlpha: 0 });
+      gsap.set(ctaRef.current,      { y: 12, autoAlpha: 0 });
+      // Use opacity only (not autoAlpha) — autoAlpha sets visibility:hidden which
+      // breaks WebkitBackgroundClip:'text' when toggled back to visible on Webkit.
+      gsap.set(solutionRef.current, { opacity: 0 });
 
+      // Entrance timeline
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // 1. Fade the dark entrance overlay out
       tl.to(overlayRef.current, {
         autoAlpha: 0,
-        duration: 0.6,
+        duration: 0.7,
         ease: 'power2.out',
       })
-        .to(
-          [blobBlueRef.current, blobGreenRef.current],
-          { autoAlpha: 1, scale: 1, duration: 1.4, stagger: 0.1 },
-          0.1,
-        )
-        .to(
-          canvasWrapRef.current,
-          { x: 0, autoAlpha: 1, duration: 1.2, ease: 'expo.out' },
-          0.3,
-        )
-        .to(labelRef.current, { y: 0, autoAlpha: 1, duration: 0.9 }, 0.3 + 0.5)
+        // 2. Section label
+        .to(labelRef.current, { y: 0, autoAlpha: 1, duration: 0.9 }, 0.5)
+        // 3. Headline words stagger
         .to(
           headlineRef.current?.querySelectorAll('.word-anim') ?? [],
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.85,
-            stagger: 0.05,
-            ease: 'power3.out',
-          },
-          0.3 + 0.7,
+          { y: 0, autoAlpha: 1, duration: 0.85, stagger: 0.05 },
+          0.7,
         )
-        .to(subRef.current, { y: 0, autoAlpha: 1, duration: 0.8 }, 0.3 + 1.1)
-        .to(
-          ctaRef.current,
-          { scale: 1, autoAlpha: 1, duration: 0.9, ease: 'expo.out' },
-          0.3 + 1.3,
-        )
+        // 4. Gradient "solução." — opacity only, never touch visibility
         .to(
           solutionRef.current,
-          { autoAlpha: 1, duration: 0.6, ease: 'power2.out' },
-          0.3 + 1.2,
+          { opacity: 1, duration: 0.6, ease: 'power2.out' },
+          0.9,
+        )
+        // 5. Subheadline
+        .to(subRef.current, { y: 0, autoAlpha: 1, duration: 0.8 }, 1.1)
+        // 6. CTAs
+        .to(
+          ctaRef.current,
+          { y: 0, autoAlpha: 1, duration: 0.85, ease: 'expo.out' },
+          1.3,
         );
-
-      // Breathing pulse on the illustration (independent of entrance tween)
-      gsap.to(canvasWrapRef.current, {
-        scale: 1.03,
-        duration: 3,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        delay: 1.8,
-        transformOrigin: 'center center',
-      });
-
-      // Parallax blobs on scroll (desktop only)
-      if (!isMobile) {
-        gsap.to(blobBlueRef.current, {
-          y: -30,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 1.5,
-          },
-        });
-        gsap.to(blobGreenRef.current, {
-          y: -50,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 1.5,
-          },
-        });
-      }
     }, sectionRef);
 
     return () => {
@@ -160,9 +112,15 @@ export default function Hero() {
       id="hero"
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-white"
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{
+        backgroundImage: `url(${heroImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
     >
-      {/* Entrance overlay — fades out at mount */}
+      {/* ── Entrance overlay (dark → transparent at mount) ── */}
       <div
         ref={overlayRef}
         aria-hidden="true"
@@ -170,102 +128,98 @@ export default function Hero() {
         style={{ backgroundColor: '#0a0f1a' }}
       />
 
-      {/* Decorative blobs */}
-      <div
-        ref={blobBlueRef}
-        aria-hidden="true"
-        className="absolute -z-0 left-[-10%] top-[10%] w-[700px] h-[500px] pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 600px 400px at center, rgba(33,150,201,0.15), transparent 70%)',
-        }}
-      />
-      <div
-        ref={blobGreenRef}
-        aria-hidden="true"
-        className="absolute -z-0 right-[-8%] bottom-[5%] w-[600px] h-[450px] pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 500px 350px at center, rgba(40,168,122,0.12), transparent 70%)',
-        }}
-      />
+      {/* ── Content ── */}
+      <div className="container-x relative z-10 flex justify-end w-full">
+        <div className="w-full md:w-1/2 flex flex-col justify-center py-36 md:py-32">
 
-      <div className="container mx-auto px-6 lg:px-8 max-w-[1280px] relative">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* Illustration — desktop/tablet */}
-          <div className="hidden md:flex items-center justify-center">
-            <div
-              ref={canvasWrapRef}
-              className="will-change-transform flex items-center justify-center w-full"
+          {/* Label */}
+          <span ref={labelRef} className="inline-block">
+            <SectionLabel
+              tone="neutral"
+              className="!text-white/70 !tracking-[1.6px]"
             >
-              <img
-                src={elderlySvg}
-                alt=""
-                aria-hidden="true"
-                className="w-full max-w-[520px] h-auto drop-shadow-xl"
-                loading="eager"
-              />
-            </div>
-          </div>
+              Rede Geronto
+            </SectionLabel>
+          </span>
 
-          {/* Mobile illustration */}
-          <div className="md:hidden flex justify-center mb-6">
-            <img
-              src={elderlySvg}
-              alt=""
-              aria-hidden="true"
-              className="w-64 h-auto"
-              loading="eager"
-            />
-          </div>
-
-          {/* Hero content */}
-          <div className="flex flex-col justify-center">
-            <span ref={labelRef} className="inline-block">
-              <SectionLabel>Rede Geronto</SectionLabel>
+          {/* Headline */}
+          <h1
+            ref={headlineRef}
+            id="hero-heading"
+            className="mt-5 text-[36px] sm:text-[44px] lg:text-[52px] font-medium leading-[1.1] tracking-[-0.02em]"
+            style={{ color: '#FFFFFF' }}
+          >
+            <span className="headline-text">
+              Seu município ainda não tem Fundo do Idoso. Isso tem{' '}
             </span>
-            <h1
-              ref={headlineRef}
-              id="hero-heading"
-              className="mt-5 text-[36px] sm:text-[44px] lg:text-[52px] font-medium leading-[1.1] tracking-[-0.02em] text-text-primary"
+            <span
+              ref={solutionRef}
+              style={{
+                color: '#52D9A8',
+                display: 'inline',
+              }}
             >
-              <span className="headline-text">
-                Seu município ainda não tem Fundo do Idoso. Isso tem{' '}
-              </span>
-              <span
-                ref={solutionRef}
-                style={{
-                  background: 'linear-gradient(135deg, #2196C9, #28A87A)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  display: 'inline',
-                }}
-              >
-                solução.
-              </span>
-            </h1>
-            <p
-              ref={subRef}
-              className="mt-6 text-[17px] leading-[1.65] text-text-secondary max-w-xl"
+              solução.
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p
+            ref={subRef}
+            className="mt-6 text-[17px] leading-[1.65] max-w-xl"
+            style={{ color: 'rgba(255,255,255,0.80)' }}
+          >
+            Mais da metade dos municípios brasileiros ainda não criaram o Fundo
+            de Direitos da Pessoa Idosa — e estão deixando de acessar milhões
+            em recursos que já existem, esperando para ser usados.
+          </p>
+
+          {/* CTAs */}
+          <div
+            ref={ctaRef}
+            className="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4"
+          >
+            <Button href="/diagnostico" variant="primary" size="lg">
+              Fazer Diagnóstico Gratuito
+              <ArrowRight size={18} aria-hidden="true" />
+            </Button>
+            <a
+              href="#problema"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'transparent',
+                border: '1.5px solid rgba(255,255,255,0.7)',
+                color: '#FFFFFF',
+                padding: '12px 28px',
+                borderRadius: '100px',
+                fontSize: '15px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  'rgba(255,255,255,0.12)';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                  'rgba(255,255,255,0.9)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  'transparent';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                  'rgba(255,255,255,0.7)';
+              }}
             >
-              Mais da metade dos municípios brasileiros ainda não criaram o
-              Fundo de Direitos da Pessoa Idosa — e estão deixando de acessar
-              milhões em recursos que já existem, esperando para ser usados.
-            </p>
-            <div
-              ref={ctaRef}
-              className="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 origin-left"
-            >
-              <Button href="/diagnostico" variant="primary" size="lg">
-                Fazer Diagnóstico Gratuito
-                <ArrowRight size={18} aria-hidden="true" />
-              </Button>
-              <Button href="#problema" variant="ghost" size="lg">
-                Entenda o cenário
-              </Button>
-            </div>
+              Entenda o cenário
+            </a>
           </div>
+
         </div>
       </div>
     </section>

@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes, ReactNode, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-type Variant = 'primary' | 'secondary' | 'green' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'green' | 'ghost' | 'ghost-white';
 type Size = 'sm' | 'md' | 'lg';
 
 interface BaseProps {
@@ -36,6 +36,8 @@ const variantBase: Record<Variant, string> = {
     'text-white grad-bg-green shadow-[0_8px_24px_rgba(26,122,94,0.35)] border border-transparent',
   ghost:
     'bg-white text-blue-deep border-[0.5px] border-blue-border shadow-[0_2px_8px_rgba(12,74,140,0.06)]',
+  'ghost-white':
+    'bg-white/10 text-white border border-white/50 backdrop-blur-[2px]',
 };
 
 const sizeClasses: Record<Size, string> = {

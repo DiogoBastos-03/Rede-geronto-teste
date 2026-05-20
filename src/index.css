@@ -38,6 +38,11 @@
     background-color: rgba(33, 150, 201, 0.2);
     color: #0c4a8c;
   }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
 }
 
 @layer utilities {

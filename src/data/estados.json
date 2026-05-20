@@ -1,0 +1,218 @@
+[
+  {
+    "uf": "AC",
+    "nome": "Acre",
+    "municipiosHabilitados": 1,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "41467659000130",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DE DIREITOS DA PESSOA IDOSA DO ACRE"
+  },
+  {
+    "uf": "AL",
+    "nome": "Alagoas",
+    "municipiosHabilitados": 16,
+    "statusFundoEstadual": "sem_fundo",
+    "cnpjEstadual": null,
+    "nomeFundoEstadual": null
+  },
+  {
+    "uf": "AM",
+    "nome": "Amazonas",
+    "municipiosHabilitados": 4,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "40762892000182",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO"
+  },
+  {
+    "uf": "AP",
+    "nome": "Amapá",
+    "municipiosHabilitados": 1,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "39471811000106",
+    "nomeFundoEstadual": "FUNDO DE DEFESA DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "BA",
+    "nome": "Bahia",
+    "municipiosHabilitados": 41,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "48207820000185",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DA PESSOA IDOSA"
+  },
+  {
+    "uf": "BR",
+    "nome": null,
+    "municipiosHabilitados": 1,
+    "statusFundoEstadual": "sem_fundo",
+    "cnpjEstadual": null,
+    "nomeFundoEstadual": null
+  },
+  {
+    "uf": "CE",
+    "nome": "Ceará",
+    "municipiosHabilitados": 53,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "26113661000117",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO DO CEARA"
+  },
+  {
+    "uf": "ES",
+    "nome": "Espírito Santo",
+    "municipiosHabilitados": 36,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "23996245000116",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DE DEFESA DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "GO",
+    "nome": "Goiás",
+    "municipiosHabilitados": 128,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "25391900000138",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "MA",
+    "nome": "Maranhão",
+    "municipiosHabilitados": 20,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "26720715000102",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA - FEDPI"
+  },
+  {
+    "uf": "MG",
+    "nome": "Minas Gerais",
+    "municipiosHabilitados": 349,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "21390387000100",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO"
+  },
+  {
+    "uf": "MS",
+    "nome": "Mato Grosso do Sul",
+    "municipiosHabilitados": 37,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "30342113000136",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "MT",
+    "nome": "Mato Grosso",
+    "municipiosHabilitados": 51,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "52535894000118",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIRETOS DA PESSOA IDOSA NO ESTADO DE MATO GROSSO - FUNEPI"
+  },
+  {
+    "uf": "PA",
+    "nome": "Pará",
+    "municipiosHabilitados": 24,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "31407665000148",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DA PESSOA IDOSA - FUNEPI"
+  },
+  {
+    "uf": "PB",
+    "nome": "Paraíba",
+    "municipiosHabilitados": 32,
+    "statusFundoEstadual": "sem_fundo",
+    "cnpjEstadual": null,
+    "nomeFundoEstadual": null
+  },
+  {
+    "uf": "PE",
+    "nome": "Pernambuco",
+    "municipiosHabilitados": 115,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "17612909000101",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DO IDOSO DE PERNAMBUCO - FEDIPE"
+  },
+  {
+    "uf": "PI",
+    "nome": "Piauí",
+    "municipiosHabilitados": 16,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "52279024000125",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO"
+  },
+  {
+    "uf": "PR",
+    "nome": "Paraná",
+    "municipiosHabilitados": 318,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "14225701000133",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "RJ",
+    "nome": "Rio de Janeiro",
+    "municipiosHabilitados": 67,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "15193180000142",
+    "nomeFundoEstadual": "FUNDO PARA A DEFESA DOS DIREITOS DA PESSOA IDOSA"
+  },
+  {
+    "uf": "RN",
+    "nome": "Rio Grande do Norte",
+    "municipiosHabilitados": 38,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "35564424000163",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DA PESSOA IDOSA"
+  },
+  {
+    "uf": "RO",
+    "nome": "Rondônia",
+    "municipiosHabilitados": 10,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "30809485000120",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA - FEDIPI"
+  },
+  {
+    "uf": "RR",
+    "nome": "Roraima",
+    "municipiosHabilitados": 3,
+    "statusFundoEstadual": "sem_fundo",
+    "cnpjEstadual": null,
+    "nomeFundoEstadual": null
+  },
+  {
+    "uf": "RS",
+    "nome": "Rio Grande do Sul",
+    "municipiosHabilitados": 213,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "22170458000121",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DA PESSOA IDOSA"
+  },
+  {
+    "uf": "SC",
+    "nome": "Santa Catarina",
+    "municipiosHabilitados": 169,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "29571512000190",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO"
+  },
+  {
+    "uf": "SE",
+    "nome": "Sergipe",
+    "municipiosHabilitados": 3,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "09354484000141",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS E PROTECAO DO IDOSO - FUNDEPROI"
+  },
+  {
+    "uf": "SP",
+    "nome": "São Paulo",
+    "municipiosHabilitados": 401,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "17087890000113",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DO IDOSO"
+  },
+  {
+    "uf": "TO",
+    "nome": "Tocantins",
+    "municipiosHabilitados": 14,
+    "statusFundoEstadual": "ativo",
+    "cnpjEstadual": "57445800000133",
+    "nomeFundoEstadual": "FUNDO ESTADUAL DOS DIREITOS DA PESSOA IDOSA DO ESTADO DO TOCANTINS - FEDIPI/TO"
+  }
+]

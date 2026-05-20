@@ -48,7 +48,15 @@
       "Bash(curl -s -o /dev/null -w \"Hero.tsx      HTTP %{http_code}\\\\n\" \"http://localhost:5174/src/components/sections/Hero.tsx\")",
       "Bash(curl -s -o /dev/null -w \"/             HTTP %{http_code}\\\\n\" http://localhost:5173/)",
       "Bash(curl -s -o /dev/null -w \"Hero.tsx      HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/Hero.tsx\")",
-      "Bash(curl -s -o /dev/null -w \"elderly.svg   HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/assets/elderly.svg\")"
+      "Bash(curl -s -o /dev/null -w \"elderly.svg   HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/assets/elderly.svg\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/Users/diogobastos/Documents/redeGeronto/src/data/municipios-dirpf.json'\\)\\); print\\('count:', len\\(d\\) if isinstance\\(d, list\\) else 'object with keys', list\\(d.keys\\(\\)\\) if isinstance\\(d, dict\\) else d\\)\")",
+      "Bash(curl -s -o /dev/null -w \"/dashboard         HTTP %{http_code}\\\\n\" http://localhost:5173/dashboard)",
+      "Bash(curl -s -o /dev/null -w \"Dashboard.tsx      HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/pages/Dashboard.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"DashboardHero.tsx  HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/dashboard/DashboardHero.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"MapaFundos.tsx     HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/dashboard/MapaFundos.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"MunicipiosDIRPF    HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/dashboard/MunicipiosDIRPF.tsx\")",
+      "Bash(node -e \"const m = require\\('/Users/diogobastos/Documents/redeGeronto/src/data/municipios-dirpf.json'\\); const r = require\\('/Users/diogobastos/Documents/redeGeronto/src/data/referencias.json'\\); console.log\\('municipios-dirpf:', m.length, 'records'\\); console.log\\('referencias:', r.length, 'records'\\); console.log\\('first municipio:', JSON.stringify\\(m[0]\\)\\); console.log\\('first referencia:', JSON.stringify\\(r[0]\\)\\);\")",
+      "Bash(npm list *)"
     ]
   }
 }
