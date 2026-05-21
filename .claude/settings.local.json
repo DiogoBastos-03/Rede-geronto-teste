@@ -56,7 +56,18 @@
       "Bash(curl -s -o /dev/null -w \"MapaFundos.tsx     HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/dashboard/MapaFundos.tsx\")",
       "Bash(curl -s -o /dev/null -w \"MunicipiosDIRPF    HTTP %{http_code}\\\\n\" \"http://localhost:5173/src/components/sections/dashboard/MunicipiosDIRPF.tsx\")",
       "Bash(node -e \"const m = require\\('/Users/diogobastos/Documents/redeGeronto/src/data/municipios-dirpf.json'\\); const r = require\\('/Users/diogobastos/Documents/redeGeronto/src/data/referencias.json'\\); console.log\\('municipios-dirpf:', m.length, 'records'\\); console.log\\('referencias:', r.length, 'records'\\); console.log\\('first municipio:', JSON.stringify\\(m[0]\\)\\); console.log\\('first referencia:', JSON.stringify\\(r[0]\\)\\);\")",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(len\\(d\\), 'entries'\\); print\\('sample:', d[0]\\)\")",
+      "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v1/localidades/municipios/1200203\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d\\)\\)\")",
+      "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v2/malhas/municipios?municipio=1200203&formato=application/vnd.geo+json\")",
+      "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/1200203?formato=application/vnd.geo+json&qualidade=minima\")",
+      "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v3/malhas/estados/12/municipios?formato=application/vnd.geo+json&qualidade=minima\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v3/malhas/estados/12?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=minima\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('types:', d.get\\('types',''\\), 'typings:', d.get\\('typings',''\\)\\)\")"
     ]
   }
 }

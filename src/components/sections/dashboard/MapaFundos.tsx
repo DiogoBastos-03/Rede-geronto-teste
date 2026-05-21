@@ -1,14 +1,14 @@
 import {
+  CSSProperties,
   useEffect,
   useMemo,
   useRef,
   useState,
-  CSSProperties,
 } from 'react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { X, ArrowRight, Building2, IdCard } from 'lucide-react';
+import { X, ArrowRight, Building2, IdCard, MapPin } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
 import {
   Estado,
@@ -16,6 +16,7 @@ import {
   REGIOES,
   effectiveStatus,
   formatCNPJ,
+  ARRECADACAO_2023_BRL_MI,
 } from './types';
 import { useEstados, useMunicipios } from './useDashboardData';
 import Skeleton from './Skeleton';
@@ -23,7 +24,6 @@ import Skeleton from './Skeleton';
 const GEO_URL =
   'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson';
 
-// Status palette — default + hover variants with richer depth
 const STATUS_COLOR: Record<
   'ativo' | 'em_tramitacao' | 'sem_fundo',
   { default: string; hover: string }
@@ -41,6 +41,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 type RegionKey = 'Todas' | keyof typeof REGIOES;
 type StatusKey = 'Todos' | 'ativo' | 'em_tramitacao' | 'sem_fundo';
+type DirpfKey = 'Todos' | 'habilitados' | 'nao_hab';
 type StatusEff = keyof typeof STATUS_COLOR;
 
 function normalize(s: string): string {
@@ -61,13 +62,467 @@ function getGeoStateName(geo: any): string {
   );
 }
 
+// ── StatCard ─────────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  value: number | string;
+  label: string;
+  solidColor?: string;
+}
+
+function StatCard({ value, label, solidColor }: StatCardProps) {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const numRef = useRef<HTMLSpanElement | null>(null);
+
+  const isNumeric = typeof value === 'number';
+  const isGradient = isNumeric && !solidColor;
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        card,
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.85,
+          ease: 'power3.out',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 88%',
+            once: true,
+          },
+        },
+      );
+
+      if (isNumeric && numRef.current) {
+        const target = value as number;
+        const obj = { val: 0 };
+        gsap.to(obj, {
+          val: target,
+          duration: 1.6,
+          ease: 'power2.out',
+          delay: 0.3,
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 88%',
+            once: true,
+          },
+          onUpdate() {
+            if (numRef.current) {
+              numRef.current.textContent = Math.round(obj.val).toLocaleString(
+                'pt-BR',
+              );
+            }
+          },
+        });
+      }
+    }, card);
+    return () => {
+      ctx.revert();
+      ScrollTrigger.refresh();
+    };
+  }, [value, isNumeric]);
+
+  const numStyle: CSSProperties = solidColor
+    ? { color: solidColor }
+    : isGradient
+    ? {
+        background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        display: 'inline-block',
+      }
+    : {};
+
+  return (
+    <div
+      ref={cardRef}
+      className="rounded-[20px] bg-white p-6 flex flex-col justify-between"
+      style={{
+        border: '1px solid rgba(12,74,140,0.08)',
+        boxShadow: '0 4px 24px rgba(12,74,140,0.06)',
+      }}
+    >
+      {isNumeric ? (
+        <span
+          ref={numRef}
+          className="text-[40px] lg:text-[44px] leading-none tracking-[-0.03em] font-extrabold"
+          style={numStyle}
+        >
+          0
+        </span>
+      ) : (
+        <span
+          className="text-[36px] lg:text-[40px] leading-none tracking-[-0.03em] font-extrabold"
+          style={{
+            background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            display: 'inline-block',
+            opacity: 1,
+          }}
+        >
+          {value}
+        </span>
+      )}
+      <p className="mt-3 text-[13px] leading-relaxed text-text-secondary">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+// ── StatusBadge ───────────────────────────────────────────────────────────────
+
+function StatusBadge({ eff }: { eff: StatusEff }) {
+  const style: CSSProperties =
+    eff === 'ativo'
+      ? { backgroundColor: '#EAF4F0', color: '#085041' }
+      : eff === 'em_tramitacao'
+      ? { backgroundColor: '#FEF3C7', color: '#92400E' }
+      : { backgroundColor: '#F1EFE8', color: '#5F5E5A' };
+
+  return (
+    <span
+      className="inline-flex items-center self-start gap-1.5 px-2.5 py-1 rounded-pill text-[11px] font-medium"
+      style={style}
+    >
+      {STATUS_LABEL[eff]}
+    </span>
+  );
+}
+
+// ── LegendDot ─────────────────────────────────────────────────────────────────
+
+function LegendDot({
+  color,
+  label,
+  border,
+}: {
+  color: string;
+  label: string;
+  border?: string;
+}) {
+  return (
+    <div className="inline-flex items-center gap-2">
+      <span
+        aria-hidden="true"
+        className="inline-block w-3 h-3 rounded-full"
+        style={{ backgroundColor: color, border }}
+      />
+      <span style={{ color: '#5F5E5A' }}>{label}</span>
+    </div>
+  );
+}
+
+// ── Pill filter button ─────────────────────────────────────────────────────────
+
+function PillButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-4 py-1.5 rounded-pill text-[13px] font-medium transition-colors border whitespace-nowrap"
+      style={{
+        backgroundColor: active ? '#0C4A8C' : '#F7F9FC',
+        color: active ? '#FFFFFF' : '#4A5568',
+        borderColor: active ? '#0C4A8C' : '#D5E3F0',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── TabButton ─────────────────────────────────────────────────────────────────
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-pill text-[12px] font-medium transition-colors"
+      style={{
+        backgroundColor: active ? '#FFFFFF' : 'transparent',
+        color: active ? '#0C4A8C' : '#5F5E5A',
+        boxShadow: active ? '0 1px 3px rgba(12,74,140,0.10)' : 'none',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── FullPanel — wide layout rendered below the map ───────────────────────────
+
+interface FullPanelProps {
+  estado: Estado;
+  municipios: MunicipioDirpf[];
+  loadingMunicipios: boolean;
+  onClose: () => void;
+}
+
+function FullPanel({
+  estado,
+  municipios,
+  loadingMunicipios,
+  onClose,
+}: FullPanelProps) {
+  const [tab, setTab] = useState<0 | 1>(0);
+  useEffect(() => setTab(0), [estado.uf]);
+
+  const eff = effectiveStatus(estado.uf, estado.statusFundoEstadual) as StatusEff;
+
+  return (
+    <>
+      {/* Close button — absolute top-right of the parent container */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Fechar painel"
+        className="absolute top-6 right-6 inline-flex items-center justify-center w-9 h-9 rounded-full text-text-secondary hover:bg-blue-light hover:text-blue-deep transition-colors"
+      >
+        <X size={20} aria-hidden="true" />
+      </button>
+
+      {/* Header: state name + status badge */}
+      <header className="flex flex-wrap items-center gap-3 mb-6 pr-12">
+        <div>
+          <p
+            className="text-[11px] uppercase tracking-[1.2px] font-medium"
+            style={{ color: '#5F5E5A' }}
+          >
+            Estado selecionado
+          </p>
+          <h3 className="mt-0.5 text-[22px] font-medium text-text-primary leading-snug">
+            {estado.nome}{' '}
+            <span className="text-text-secondary text-[15px] font-normal">
+              ({estado.uf})
+            </span>
+          </h3>
+        </div>
+        <StatusBadge eff={eff} />
+      </header>
+
+      {/* 2-col body: left info, right table */}
+      <div className="grid lg:grid-cols-12 gap-6">
+
+        {/* Left — fund block + count + CTA */}
+        <div className="lg:col-span-4 flex flex-col gap-4">
+
+          {/* Fund block */}
+          {estado.nomeFundoEstadual ? (
+            <div
+              className="rounded-[12px] p-4 flex flex-col gap-2"
+              style={{ backgroundColor: '#F7F9FC' }}
+            >
+              <p
+                className="text-[11px] uppercase tracking-[1.2px] font-medium"
+                style={{ color: '#5F5E5A' }}
+              >
+                Fundo Estadual
+              </p>
+              <p className="text-[14px] font-medium text-text-primary leading-snug">
+                {estado.nomeFundoEstadual}
+              </p>
+              <p className="text-[12px] font-mono" style={{ color: '#5F5E5A' }}>
+                CNPJ {formatCNPJ(estado.cnpjEstadual)}
+              </p>
+            </div>
+          ) : (
+            <div
+              className="rounded-[12px] p-4"
+              style={{
+                backgroundColor: '#F1EFE8',
+                border: '1px dashed rgba(0,0,0,0.10)',
+              }}
+            >
+              <p className="text-[13px]" style={{ color: '#5F5E5A' }}>
+                Este estado ainda não tem um fundo estadual{' '}
+                {eff === 'em_tramitacao'
+                  ? 'em operação (PL em tramitação).'
+                  : 'criado.'}
+              </p>
+            </div>
+          )}
+
+          {/* Municipality count */}
+          <div
+            className="rounded-[12px] p-4 flex items-center gap-4"
+            style={{
+              background: 'linear-gradient(135deg, #E8F2FB 0%, #EAF4F0 100%)',
+              border: '1px solid rgba(12,74,140,0.10)',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="inline-flex w-11 h-11 shrink-0 rounded-full items-center justify-center bg-white"
+              style={{ color: '#0C4A8C' }}
+            >
+              <Building2 size={20} />
+            </span>
+            <div className="flex flex-col">
+              <span
+                className="leading-none tracking-[-0.02em]"
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  display: 'inline-block',
+                }}
+              >
+                {estado.municipiosHabilitados}
+              </span>
+              <span className="text-[12px] mt-1" style={{ color: '#5F5E5A' }}>
+                municípios habilitados DIRPF
+              </span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <a
+            href="/consultoria"
+            className="inline-flex items-center justify-center gap-2 w-full rounded-pill px-5 py-3 text-[14px] font-medium text-white transition-shadow hover:shadow-[0_10px_28px_rgba(12,74,140,0.45)]"
+            style={{
+              background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
+              boxShadow: '0 4px 14px rgba(12,74,140,0.35)',
+            }}
+          >
+            Solicitar Consultoria
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+        </div>
+
+        {/* Right — tab toggle + scrollable municipality list */}
+        <div className="lg:col-span-8 flex flex-col gap-3">
+          <div
+            role="tablist"
+            aria-label="Visualizar municípios"
+            className="inline-flex p-0.5 rounded-pill self-start"
+            style={{
+              backgroundColor: '#F1EFE8',
+              border: '1px solid rgba(0,0,0,0.06)',
+            }}
+          >
+            <TabButton active={tab === 0} onClick={() => setTab(0)}>
+              <IdCard size={14} aria-hidden="true" />
+              CNPJ
+            </TabButton>
+            <TabButton active={tab === 1} onClick={() => setTab(1)}>
+              <Building2 size={14} aria-hidden="true" />
+              Nome do Fundo
+            </TabButton>
+          </div>
+
+          <div
+            role="tabpanel"
+            className="rounded-[12px] overflow-hidden"
+            style={{ border: '1px solid rgba(12,74,140,0.08)' }}
+          >
+            <div
+              className="px-4 py-2 text-[11px] uppercase tracking-[1.2px] font-medium grid grid-cols-2 gap-4 sticky top-0"
+              style={{ color: '#5F5E5A', backgroundColor: '#F7F9FC' }}
+            >
+              <span>Município</span>
+              <span>{tab === 0 ? 'CNPJ' : 'Nome do Fundo'}</span>
+            </div>
+
+            <div
+              className="overflow-y-auto"
+              style={{ maxHeight: '65vh' }}
+            >
+              {loadingMunicipios ? (
+                <div className="p-3 space-y-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} height={20} />
+                  ))}
+                </div>
+              ) : municipios.length === 0 ? (
+                <p className="p-4 text-[13px]" style={{ color: '#5F5E5A' }}>
+                  Nenhum município habilitado neste estado.
+                </p>
+              ) : (
+                <ul
+                  className="divide-y"
+                  style={{ borderColor: 'rgba(12,74,140,0.06)' }}
+                >
+                  {municipios.map((m, i) => (
+                    <li
+                      key={i}
+                      className="grid grid-cols-2 gap-4 px-4 py-2.5 text-[12px] leading-snug"
+                    >
+                      <span
+                        className="text-text-primary font-medium truncate"
+                        title={m.municipio}
+                      >
+                        {m.municipio}
+                      </span>
+                      {tab === 0 ? (
+                        <span
+                          className="font-mono text-[11px]"
+                          style={{ color: '#5F5E5A' }}
+                        >
+                          {formatCNPJ(m.cnpj)}
+                        </span>
+                      ) : (
+                        <span
+                          className="truncate"
+                          style={{ color: '#5F5E5A' }}
+                          title={m.nomeFundo}
+                        >
+                          {m.nomeFundo}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+
 export default function MapaFundos() {
   const { data: estados, loading: loadingEstados } = useEstados();
   const { data: municipios, loading: loadingMunicipios } = useMunicipios();
 
   const sectionRef = useRef<HTMLElement | null>(null);
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
   const mapWrapRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const painelRef = useRef<HTMLDivElement | null>(null);
 
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [hoverUF, setHoverUF] = useState<string | null>(null);
@@ -81,6 +536,7 @@ export default function MapaFundos() {
 
   const [region, setRegion] = useState<RegionKey>('Todas');
   const [statusFilter, setStatusFilter] = useState<StatusKey>('Todos');
+  const [dirpfFilter, setDirpfFilter] = useState<DirpfKey>('Todos');
 
   const byName = useMemo(() => {
     const m = new Map<string, Estado>();
@@ -96,21 +552,34 @@ export default function MapaFundos() {
     return m;
   }, [estados]);
 
-  const visibleUFs = useMemo(() => {
-    if (!estados) return new Set<string>();
+  const filteredEstados = useMemo(() => {
+    if (!estados) return [];
     const regionUFs =
       region === 'Todas'
         ? new Set(estados.map((e) => e.uf))
         : new Set(REGIOES[region] ?? []);
-    const set = new Set<string>();
-    estados.forEach((e) => {
-      if (!e.nome) return;
-      if (!regionUFs.has(e.uf)) return;
-      const eff = effectiveStatus(e.uf, e.statusFundoEstadual);
-      if (statusFilter === 'Todos' || eff === statusFilter) set.add(e.uf);
-    });
-    return set;
-  }, [estados, region, statusFilter]);
+
+    return estados
+      .filter((e) => {
+        if (!e.nome) return false;
+        if (!regionUFs.has(e.uf)) return false;
+        const eff = effectiveStatus(e.uf, e.statusFundoEstadual);
+        if (statusFilter !== 'Todos' && eff !== statusFilter) return false;
+        if (dirpfFilter === 'habilitados' && e.municipiosHabilitados === 0)
+          return false;
+        if (dirpfFilter === 'nao_hab' && e.municipiosHabilitados > 0)
+          return false;
+        return true;
+      })
+      .sort((a, b) =>
+        (a.nome ?? '').localeCompare(b.nome ?? '', 'pt-BR'),
+      );
+  }, [estados, region, statusFilter, dirpfFilter]);
+
+  const visibleUFSet = useMemo(
+    () => new Set(filteredEstados.map((e) => e.uf)),
+    [filteredEstados],
+  );
 
   const selectedEstado = selectedUF ? byUF.get(selectedUF) ?? null : null;
   const selectedMunicipios: MunicipioDirpf[] = useMemo(() => {
@@ -118,35 +587,29 @@ export default function MapaFundos() {
     return municipios.filter((m) => m.uf === selectedUF);
   }, [selectedUF, municipios]);
 
-  // GSAP: title clip-path + map fade/scale
+  const counts = useMemo(() => {
+    if (!estados) return { total: 0, ativo: 0, tram: 0, sem: 0, habilitados: 0 };
+    const allReal = estados.filter((e) => e.nome);
+    return {
+      total: allReal.length,
+      ativo: allReal.filter(
+        (e) => effectiveStatus(e.uf, e.statusFundoEstadual) === 'ativo',
+      ).length,
+      tram: allReal.filter(
+        (e) =>
+          effectiveStatus(e.uf, e.statusFundoEstadual) === 'em_tramitacao',
+      ).length,
+      sem: allReal.filter(
+        (e) => effectiveStatus(e.uf, e.statusFundoEstadual) === 'sem_fundo',
+      ).length,
+      habilitados: allReal.reduce((s, e) => s + e.municipiosHabilitados, 0),
+    };
+  }, [estados]);
+
+  // GSAP: map fade on data load
   useEffect(() => {
     if (!estados) return;
     const ctx = gsap.context(() => {
-      if (titleRef.current) {
-        gsap.set(titleRef.current, {
-          clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
-          y: 24,
-        });
-        gsap.fromTo(
-          titleRef.current,
-          {
-            clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
-            y: 24,
-          },
-          {
-            clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0 100%)',
-            y: 0,
-            duration: 1.1,
-            ease: 'expo.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: titleRef.current,
-              start: 'top 85%',
-              once: true,
-            },
-          },
-        );
-      }
       if (mapWrapRef.current) {
         gsap.set(mapWrapRef.current, { scale: 0.95, autoAlpha: 0 });
         gsap.fromTo(
@@ -173,25 +636,45 @@ export default function MapaFundos() {
     };
   }, [estados]);
 
-  const panelOpen = selectedUF !== null;
+  // GSAP: reanimate list items when filteredEstados changes
+  useEffect(() => {
+    if (!listRef.current) return;
+    const items = listRef.current.querySelectorAll('[data-state-card]');
+    if (!items.length) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        items,
+        { y: 20, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.5,
+          stagger: 0.04,
+          ease: 'power3.out',
+        },
+      );
+    }, listRef);
+    return () => ctx.revert();
+  }, [filteredEstados]);
 
-  const counts = useMemo(() => {
-    if (!estados) return { total: 0, ativo: 0, tram: 0, sem: 0 };
-    const allReal = estados.filter((e) => e.nome);
-    return {
-      total: allReal.length,
-      ativo: allReal.filter(
-        (e) => effectiveStatus(e.uf, e.statusFundoEstadual) === 'ativo',
-      ).length,
-      tram: allReal.filter(
-        (e) =>
-          effectiveStatus(e.uf, e.statusFundoEstadual) === 'em_tramitacao',
-      ).length,
-      sem: allReal.filter(
-        (e) => effectiveStatus(e.uf, e.statusFundoEstadual) === 'sem_fundo',
-      ).length,
-    };
-  }, [estados]);
+  // GSAP: panel open (or state switch) → fade+slide in; panel close → list reappears
+  useEffect(() => {
+    if (selectedUF && painelRef.current) {
+      gsap.fromTo(
+        painelRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+      );
+    } else if (!selectedUF && listRef.current) {
+      gsap.fromTo(
+        listRef.current,
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out' },
+      );
+    }
+  }, [selectedUF]);
+
+  const panelOpen = selectedUF !== null && selectedEstado !== null;
 
   return (
     <section
@@ -201,62 +684,203 @@ export default function MapaFundos() {
       className="relative py-[120px] lg:py-[140px] bg-white"
     >
       <div className="container-x">
+        {/* ── Section header ── */}
         <div className="max-w-3xl mb-10 lg:mb-14">
-          <SectionLabel>Mapa de Fundos Estaduais</SectionLabel>
-          <div
-            className="mt-5 overflow-hidden"
-            style={{ paddingBottom: '4px' }}
+          <SectionLabel>Panorama Nacional</SectionLabel>
+          <h2
+            id="mapa-fundos-heading"
+            className="mt-5 text-[28px] sm:text-[36px] lg:text-[40px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
           >
-            <h2
-              ref={titleRef}
-              id="mapa-fundos-heading"
-              className="text-[28px] sm:text-[36px] lg:text-[40px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
-            >
-              Onde estão os fundos estaduais ativos
-            </h2>
-          </div>
+            Mapa dos Fundos Estaduais da Pessoa Idosa
+          </h2>
           <p className="mt-5 text-[16px] sm:text-[17px] leading-[1.65] text-text-secondary">
-            Clique em um estado para ver detalhes do fundo estadual e a lista
-            de municípios habilitados.
+            Panorama completo — legislação, arrecadação, municípios habilitados
+            e oportunidades de consultoria em todos os estados brasileiros.
           </p>
         </div>
 
-        {/* Filters (legend moved below the map) */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:items-end justify-end">
-          <SelectField
-            label="Região"
-            value={region}
-            onChange={(v) => setRegion(v as RegionKey)}
-            options={[
-              'Todas',
-              ...(Object.keys(REGIOES) as Array<keyof typeof REGIOES>),
-            ]}
+        {/* ── 4 stat cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <StatCard
+            value={26}
+            label="Estados com Fundo Ativo"
+            solidColor="#1B8A6B"
           />
-          <SelectField
-            label="Status"
-            value={statusFilter}
-            onChange={(v) => setStatusFilter(v as StatusKey)}
-            options={[
-              { value: 'Todos', label: 'Todos' },
-              { value: 'ativo', label: 'Fundo Ativo' },
-              { value: 'em_tramitacao', label: 'PL em tramitação' },
-              { value: 'sem_fundo', label: 'Sem fundo' },
-            ]}
+          <StatCard
+            value={1}
+            label="PL em Tramitação"
+            solidColor="#F0B429"
           />
+          <StatCard
+            value={counts.habilitados}
+            label="Municípios Habilitados"
+          />
+          <StatCard value={`R$ ${ARRECADACAO_2023_BRL_MI}M`} label="Arrecadação Total (2023)" />
         </div>
 
-        <p
-          className="text-[13px] mb-4"
-          style={{ color: '#5F5E5A' }}
-          aria-live="polite"
-        >
-          {visibleUFs.size} estado{visibleUFs.size === 1 ? '' : 's'} exibido
-          {visibleUFs.size === 1 ? '' : 's'}
-        </p>
+        {/* ── Filter rows ── */}
+        <div className="mb-8 flex flex-col gap-3">
+          {/* Row 1 — DIRPF */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span
+              className="text-[12px] font-medium shrink-0"
+              style={{ color: '#5F5E5A', minWidth: '148px' }}
+            >
+              Habilitação DIRPF
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { key: 'Todos', label: 'Todos' },
+                  { key: 'habilitados', label: 'Habilitados' },
+                  { key: 'nao_hab', label: 'Nao Hab.' },
+                ] as { key: DirpfKey; label: string }[]
+              ).map(({ key, label }) => (
+                <PillButton
+                  key={key}
+                  active={dirpfFilter === key}
+                  onClick={() => setDirpfFilter(key)}
+                >
+                  {label}
+                </PillButton>
+              ))}
+            </div>
+          </div>
 
-        {/* Map + Side panel layout */}
-        <div className="relative grid lg:grid-cols-12 gap-6">
-          <div className={panelOpen ? 'lg:col-span-8' : 'lg:col-span-12'}>
+          {/* Row 2 — Status */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span
+              className="text-[12px] font-medium shrink-0"
+              style={{ color: '#5F5E5A', minWidth: '148px' }}
+            >
+              Status
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { key: 'Todos', label: 'Todos' },
+                  { key: 'ativo', label: 'Ativos' },
+                  { key: 'em_tramitacao', label: 'Em Tramitacao' },
+                ] as { key: StatusKey; label: string }[]
+              ).map(({ key, label }) => (
+                <PillButton
+                  key={key}
+                  active={statusFilter === key}
+                  onClick={() => setStatusFilter(key)}
+                >
+                  {label}
+                </PillButton>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 3 — Regiao */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span
+              className="text-[12px] font-medium shrink-0"
+              style={{ color: '#5F5E5A', minWidth: '148px' }}
+            >
+              Regiao
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  'Todas',
+                  ...(Object.keys(REGIOES) as Array<keyof typeof REGIOES>),
+                ] as RegionKey[]
+              ).map((r) => (
+                <PillButton
+                  key={r}
+                  active={region === r}
+                  onClick={() => setRegion(r)}
+                >
+                  {r}
+                </PillButton>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Grid: list (35%) + map (1fr) ── */}
+        <div
+          className="grid gap-6"
+          style={{ gridTemplateColumns: '35% 1fr' }}
+        >
+          {/* Left col — state list, always visible */}
+          <div>
+              <p
+                className="text-[13px] mb-3"
+                style={{ color: '#5F5E5A' }}
+                aria-live="polite"
+              >
+                {filteredEstados.length} estado
+                {filteredEstados.length === 1 ? '' : 's'}
+              </p>
+
+              {loadingEstados ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} height={72} rounded="12px" />
+                  ))}
+                </div>
+              ) : (
+                <div
+                  ref={listRef}
+                  className="max-h-[580px] overflow-y-auto pr-1 space-y-2"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
+                  {filteredEstados.map((e) => {
+                    const eff = effectiveStatus(
+                      e.uf,
+                      e.statusFundoEstadual,
+                    ) as StatusEff;
+                    const isSelected = selectedUF === e.uf;
+                    return (
+                      <button
+                        key={e.uf}
+                        type="button"
+                        data-state-card
+                        onClick={() => setSelectedUF(isSelected ? null : e.uf)}
+                        className="w-full text-left rounded-[12px] p-4 transition-colors"
+                        style={{
+                          border: isSelected
+                            ? '1.5px solid #0C4A8C'
+                            : '1px solid rgba(12,74,140,0.10)',
+                          backgroundColor: isSelected ? '#EBF4FF' : '#FFFFFF',
+                          boxShadow: isSelected
+                            ? '0 4px 14px rgba(12,74,140,0.12)'
+                            : '0 2px 8px rgba(12,74,140,0.04)',
+                        }}
+                        aria-pressed={isSelected}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-[14px] font-medium text-text-primary">
+                            {e.nome}{' '}
+                            <span
+                              className="text-[12px] font-normal"
+                              style={{ color: '#5F5E5A' }}
+                            >
+                              ({e.uf})
+                            </span>
+                          </span>
+                          <StatusBadge eff={eff} />
+                        </div>
+                        <div
+                          className="inline-flex items-center gap-1 text-[12px]"
+                          style={{ color: '#5F5E5A' }}
+                        >
+                          <MapPin size={12} aria-hidden="true" />
+                          {e.municipiosHabilitados} municípios
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          {/* Map — right column */}
+          <div>
             {loadingEstados ? (
               <Skeleton height={520} rounded="20px" />
             ) : (
@@ -288,7 +912,7 @@ export default function MapaFundos() {
                                 estado.statusFundoEstadual,
                               ) as StatusEff)
                             : 'sem_fundo';
-                          const isVisible = uf && visibleUFs.has(uf);
+                          const isVisible = uf ? visibleUFSet.has(uf) : false;
                           const isSelected = selectedUF === uf;
                           const palette = STATUS_COLOR[eff];
                           return (
@@ -317,7 +941,10 @@ export default function MapaFundos() {
                               }}
                               onMouseLeave={() => {
                                 setHoverUF(null);
-                                setTooltip((t) => ({ ...t, visible: false }));
+                                setTooltip((t) => ({
+                                  ...t,
+                                  visible: false,
+                                }));
                               }}
                               onClick={() => estado && setSelectedUF(uf)}
                               tabIndex={estado ? 0 : -1}
@@ -328,17 +955,21 @@ export default function MapaFundos() {
                               }
                               style={{
                                 default: {
-                                  fill: isVisible ? palette.default : '#F1EFE8',
+                                  fill: isVisible
+                                    ? palette.default
+                                    : '#F1EFE8',
                                   stroke: '#FFFFFF',
-                                  strokeWidth: isSelected ? 2 : 0.8,
+                                  strokeWidth: isSelected ? 2.5 : 0.8,
                                   outline: 'none',
                                   cursor: estado ? 'pointer' : 'default',
-                                  opacity: isVisible ? 1 : 0.4,
+                                  opacity: isVisible ? 1 : 0.35,
                                   transition:
                                     'fill 0.2s ease, opacity 0.2s ease, stroke-width 0.2s ease',
                                 },
                                 hover: {
-                                  fill: isVisible ? palette.hover : '#E8E5DE',
+                                  fill: isVisible
+                                    ? palette.hover
+                                    : '#E8E5DE',
                                   stroke: '#FFFFFF',
                                   strokeWidth: 1.2,
                                   outline: 'none',
@@ -357,7 +988,7 @@ export default function MapaFundos() {
                   </ComposableMap>
                 </div>
 
-                {/* Legend below the map */}
+                {/* Legend */}
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[13px]">
                   <LegendDot
                     color={STATUS_COLOR.ativo.default}
@@ -376,20 +1007,29 @@ export default function MapaFundos() {
               </>
             )}
           </div>
+        </div>
 
-          {/* Side panel */}
-          {panelOpen && selectedEstado && (
-            <SidePanel
+        {/* ── Full-width panel below map ── */}
+        {panelOpen && selectedEstado && (
+          <div
+            ref={painelRef}
+            className="relative mt-6 w-full rounded-[20px] bg-white p-8"
+            style={{
+              border: '1px solid #B5D4F4',
+              boxShadow: '0 8px 32px rgba(12,74,140,0.10)',
+            }}
+          >
+            <FullPanel
               estado={selectedEstado}
               municipios={selectedMunicipios}
               loadingMunicipios={loadingMunicipios}
               onClose={() => setSelectedUF(null)}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Floating tooltip — follows the mouse via position: fixed */}
+      {/* Floating tooltip */}
       {tooltip.visible && (
         <div
           role="tooltip"
@@ -418,366 +1058,11 @@ export default function MapaFundos() {
           </div>
         </div>
       )}
-      {/* Hover indicator (visually inert, retained for testing) */}
-      <span aria-hidden="true" data-hover={hoverUF ?? ''} className="sr-only" />
-    </section>
-  );
-}
-
-function LegendDot({
-  color,
-  label,
-  border,
-}: {
-  color: string;
-  label: string;
-  border?: string;
-}) {
-  return (
-    <div className="inline-flex items-center gap-2">
       <span
         aria-hidden="true"
-        className="inline-block w-3 h-3 rounded-full"
-        style={{ backgroundColor: color, border }}
+        data-hover={hoverUF ?? ''}
+        className="sr-only"
       />
-      <span style={{ color: '#5F5E5A' }}>{label}</span>
-    </div>
-  );
-}
-
-interface OptionObj {
-  value: string;
-  label: string;
-}
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: (string | OptionObj)[];
-}) {
-  const id = `sel-${label.toLowerCase().replace(/\s/g, '-')}`;
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block text-[11px] uppercase tracking-[1.2px] font-medium mb-1.5"
-        style={{ color: '#5F5E5A' }}
-      >
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-input px-3 py-2 text-[14px] outline-none cursor-pointer"
-        style={{
-          border: '1px solid #B5D4F4',
-          backgroundColor: '#F7F9FC',
-          color: '#2C2C2A',
-          minWidth: 160,
-        }}
-      >
-        {options.map((o) => {
-          const opt: OptionObj =
-            typeof o === 'string' ? { value: o, label: o } : o;
-          return (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          );
-        })}
-      </select>
-    </div>
-  );
-}
-
-interface SidePanelProps {
-  estado: Estado;
-  municipios: MunicipioDirpf[];
-  loadingMunicipios: boolean;
-  onClose: () => void;
-}
-
-function SidePanel({
-  estado,
-  municipios,
-  loadingMunicipios,
-  onClose,
-}: SidePanelProps) {
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const [tab, setTab] = useState<0 | 1>(0);
-
-  useEffect(() => {
-    if (!panelRef.current) return;
-    gsap.fromTo(
-      panelRef.current,
-      { xPercent: 100, autoAlpha: 0.5 },
-      { xPercent: 0, autoAlpha: 1, duration: 0.55, ease: 'expo.out' },
-    );
-  }, [estado.uf]);
-
-  // Reset tab when switching state
-  useEffect(() => setTab(0), [estado.uf]);
-
-  const eff = effectiveStatus(estado.uf, estado.statusFundoEstadual);
-  const statusStyle: CSSProperties =
-    eff === 'ativo'
-      ? { backgroundColor: '#EAF4F0', color: '#085041' }
-      : eff === 'em_tramitacao'
-      ? { backgroundColor: '#FEF3C7', color: '#92400E' }
-      : { backgroundColor: '#F1EFE8', color: '#5F5E5A' };
-
-  return (
-    <aside
-      ref={panelRef}
-      aria-label={`Detalhes do estado ${estado.nome}`}
-      className="lg:col-span-4 rounded-[20px] bg-white p-6 self-start sticky lg:top-24 flex flex-col gap-5 overflow-y-auto"
-      style={{
-        border: '1px solid rgba(12,74,140,0.10)',
-        boxShadow: '0 12px 36px rgba(12,74,140,0.10)',
-        maxHeight: '70vh',
-      }}
-    >
-      {/* TOP — name + close + status badge */}
-      <header className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p
-              className="text-[11px] uppercase tracking-[1.2px] font-medium"
-              style={{ color: '#5F5E5A' }}
-            >
-              Estado
-            </p>
-            <h3 className="mt-1 text-[20px] sm:text-[22px] font-medium text-text-primary leading-snug">
-              {estado.nome}{' '}
-              <span className="text-text-secondary text-[14px] font-normal">
-                ({estado.uf})
-              </span>
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar painel"
-            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-text-secondary hover:bg-blue-light hover:text-blue-deep transition-colors"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-        <span
-          className="inline-flex items-center self-start gap-1.5 px-2.5 py-1 rounded-pill text-[12px] font-medium"
-          style={statusStyle}
-        >
-          {STATUS_LABEL[eff]}
-        </span>
-      </header>
-
-      {/* FUNDO ESTADUAL BLOCK */}
-      {estado.nomeFundoEstadual ? (
-        <div
-          className="rounded-[12px] p-4 flex flex-col gap-3"
-          style={{ backgroundColor: '#F7F9FC' }}
-        >
-          <p
-            className="text-[11px] uppercase tracking-[1.2px] font-medium"
-            style={{ color: '#5F5E5A' }}
-          >
-            Fundo Estadual
-          </p>
-          <p className="text-[14px] font-medium text-text-primary leading-snug">
-            {estado.nomeFundoEstadual}
-          </p>
-          <p
-            className="text-[12px] font-mono"
-            style={{ color: '#5F5E5A' }}
-          >
-            CNPJ {formatCNPJ(estado.cnpjEstadual)}
-          </p>
-        </div>
-      ) : (
-        <div
-          className="rounded-[12px] p-4"
-          style={{
-            backgroundColor: '#F1EFE8',
-            border: '1px dashed rgba(0,0,0,0.10)',
-          }}
-        >
-          <p className="text-[13px]" style={{ color: '#5F5E5A' }}>
-            Este estado ainda não tem um fundo estadual{' '}
-            {eff === 'em_tramitacao' ? 'em operação (PL em tramitação).' : 'criado.'}
-          </p>
-        </div>
-      )}
-
-      {/* MUNICIPALITY COUNT — destaque */}
-      <div
-        className="rounded-[12px] p-4 flex items-center gap-4"
-        style={{
-          background: 'linear-gradient(135deg, #E8F2FB 0%, #EAF4F0 100%)',
-          border: '1px solid rgba(12,74,140,0.10)',
-        }}
-      >
-        <span
-          aria-hidden="true"
-          className="inline-flex w-11 h-11 shrink-0 rounded-full items-center justify-center bg-white"
-          style={{ color: '#0C4A8C' }}
-        >
-          <Building2 size={20} />
-        </span>
-        <div className="flex flex-col">
-          <span
-            className="leading-none tracking-[-0.02em]"
-            style={{
-              fontSize: '28px',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              display: 'inline-block',
-            }}
-          >
-            {estado.municipiosHabilitados}
-          </span>
-          <span
-            className="text-[12px] mt-1"
-            style={{ color: '#5F5E5A' }}
-          >
-            municípios habilitados DIRPF
-          </span>
-        </div>
-      </div>
-
-      {/* MUNICIPALITY LIST WITH TABS */}
-      <div className="flex flex-col gap-3">
-        <div
-          role="tablist"
-          aria-label="Visualizar municípios"
-          className="inline-flex p-0.5 rounded-pill self-start"
-          style={{
-            backgroundColor: '#F1EFE8',
-            border: '1px solid rgba(0,0,0,0.06)',
-          }}
-        >
-          <TabButton active={tab === 0} onClick={() => setTab(0)}>
-            <IdCard size={14} aria-hidden="true" />
-            CNPJ
-          </TabButton>
-          <TabButton active={tab === 1} onClick={() => setTab(1)}>
-            <Building2 size={14} aria-hidden="true" />
-            Nome do Fundo
-          </TabButton>
-        </div>
-
-        <div
-          role="tabpanel"
-          className="rounded-[12px] overflow-hidden"
-          style={{ border: '1px solid rgba(12,74,140,0.08)' }}
-        >
-          <div
-            className="px-4 py-2 text-[11px] uppercase tracking-[1.2px] font-medium grid grid-cols-2 gap-4"
-            style={{ color: '#5F5E5A', backgroundColor: '#F7F9FC' }}
-          >
-            <span>Município</span>
-            <span>{tab === 0 ? 'CNPJ' : 'Nome do Fundo'}</span>
-          </div>
-          <div>
-            {loadingMunicipios ? (
-              <div className="p-3 space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} height={20} />
-                ))}
-              </div>
-            ) : municipios.length === 0 ? (
-              <p
-                className="p-4 text-[13px]"
-                style={{ color: '#5F5E5A' }}
-              >
-                Nenhum município habilitado neste estado.
-              </p>
-            ) : (
-              <ul
-                className="divide-y"
-                style={{ borderColor: 'rgba(12,74,140,0.06)' }}
-              >
-                {municipios.map((m, i) => (
-                  <li
-                    key={i}
-                    className="grid grid-cols-2 gap-4 px-4 py-2.5 text-[12px] leading-snug"
-                  >
-                    <span
-                      className="text-text-primary font-medium truncate"
-                      title={m.municipio}
-                    >
-                      {m.municipio}
-                    </span>
-                    {tab === 0 ? (
-                      <span
-                        className="font-mono text-[11px]"
-                        style={{ color: '#5F5E5A' }}
-                      >
-                        {formatCNPJ(m.cnpj)}
-                      </span>
-                    ) : (
-                      <span
-                        className="truncate"
-                        style={{ color: '#5F5E5A' }}
-                        title={m.nomeFundo}
-                      >
-                        {m.nomeFundo}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <a
-        href="/consultoria"
-        className="mt-auto inline-flex items-center justify-center gap-2 w-full rounded-pill px-5 py-3 text-[14px] font-medium text-white transition-shadow hover:shadow-[0_10px_28px_rgba(12,74,140,0.45)]"
-        style={{
-          background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
-          boxShadow: '0 4px 14px rgba(12,74,140,0.35)',
-        }}
-      >
-        Solicitar Consultoria
-        <ArrowRight size={16} aria-hidden="true" />
-      </a>
-    </aside>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-pill text-[12px] font-medium transition-colors"
-      style={{
-        backgroundColor: active ? '#FFFFFF' : 'transparent',
-        color: active ? '#0C4A8C' : '#5F5E5A',
-        boxShadow: active ? '0 1px 3px rgba(12,74,140,0.10)' : 'none',
-      }}
-    >
-      {children}
-    </button>
+    </section>
   );
 }

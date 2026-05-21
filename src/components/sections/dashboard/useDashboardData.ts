@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Estado, MunicipioDirpf, Referencia } from './types';
 
+export type CoordsMap = Record<string, { lat: number; lng: number }>;
+
 type LoadResult<T> = { data: T | null; loading: boolean };
 
 export function useEstados(): LoadResult<Estado[]> {
@@ -37,6 +39,20 @@ export function useReferencias(): LoadResult<Referencia[]> {
     let alive = true;
     import('../../../data/referencias.json').then((m) => {
       if (alive) setData(m.default as Referencia[]);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return { data, loading: data === null };
+}
+
+export function useCoordsMap(): LoadResult<CoordsMap> {
+  const [data, setData] = useState<CoordsMap | null>(null);
+  useEffect(() => {
+    let alive = true;
+    import('../../../data/coordenadas-municipios.json').then((m) => {
+      if (alive) setData(m.default as CoordsMap);
     });
     return () => {
       alive = false;
