@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CheckCircle2, Star, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Star, ArrowRight } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Footer from '../components/layout/Footer';
+import RecursosHero from '../components/sections/recursos/RecursosHero';
 import RecursoCard from '../components/sections/RecursoCard';
 import type { Recurso } from '../components/sections/RecursoCard';
 import recursosData from '../data/recursos.json';
@@ -35,32 +36,8 @@ export default function Recursos() {
         ]}
       />
 
-      <main id="recursos-hero">
-      {/* Hero */}
-      <div
-        className="relative pt-32 pb-16 overflow-hidden"
-        style={{ backgroundColor: '#0D1B2A' }}
-      >
-        <div className="container-x relative">
-          <span
-            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[1.4px] font-semibold mb-4"
-            style={{ color: 'rgba(255,255,255,0.55)' }}
-          >
-            <BookOpen size={14} aria-hidden="true" />
-            Biblioteca de Recursos Educativos
-          </span>
-          <h1 className="text-[36px] sm:text-[48px] lg:text-[56px] font-semibold leading-[1.1] tracking-[-0.02em] text-white max-w-3xl">
-            Tudo que você precisa para{' '}
-            <span style={{ color: '#4FC3F7' }}>implementar o Fundo Municipal</span>
-          </h1>
-          <p
-            className="mt-6 text-[17px] leading-[1.65] max-w-2xl"
-            style={{ color: 'rgba(255,255,255,0.70)' }}
-          >
-            {_meta.hero.subtitulo}
-          </p>
-        </div>
-      </div>
+      <main>
+        <RecursosHero />
 
       {/* Stats bar */}
       <div className="border-b border-[rgba(0,0,0,0.07)] bg-white">
