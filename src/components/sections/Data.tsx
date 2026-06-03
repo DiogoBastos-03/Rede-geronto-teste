@@ -25,7 +25,6 @@ const STATUS_LABEL: Record<string, string> = {
   sem_fundo: 'Sem fundo estadual',
 };
 
-// Normalise for GeoJSON name → UF lookup
 function normalise(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
@@ -39,13 +38,42 @@ interface Tooltip {
   count: number;
 }
 
+// ── Stat chips data (official numbers only) ───────────────────────────────────
+const CHIPS = [
+  {
+    value: '26',
+    unit: 'estados',
+    label: 'com fundo estadual ativo',
+    color: '#1B8A6B',
+    dotBg: '#D1FAE5',
+  },
+  {
+    value: '2.160',
+    unit: 'municípios',
+    label: 'habilitados a receber doações (DIRPF)',
+    color: '#2196C9',
+    dotBg: '#DBEAFE',
+  },
+  {
+    value: 'R$ 153,3 mi',
+    unit: '',
+    label: 'em doações via IRPF repassadas em 2025',
+    color: '#D99A2B',
+    dotBg: '#FEF3C7',
+    note: 'Fonte: Receita Federal · 2025',
+  },
+] as const;
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function Data() {
-  const sectionRef  = useRef<HTMLElement | null>(null);
-  const headRef     = useRef<HTMLDivElement | null>(null);
-  const numberRef   = useRef<HTMLSpanElement | null>(null);
-  const bulletsRef  = useRef<HTMLDivElement | null>(null);
-  const mapRef      = useRef<HTMLDivElement | null>(null);
-  const ctaRef      = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const headRef    = useRef<HTMLDivElement | null>(null);
+  const heroRef    = useRef<HTMLDivElement | null>(null);
+  const numberRef  = useRef<HTMLSpanElement | null>(null);
+  const chipsRef   = useRef<HTMLDivElement | null>(null);
+  const mapRef     = useRef<HTMLDivElement | null>(null);
+  const ctaRef     = useRef<HTMLDivElement | null>(null);
 
   const [estados, setEstados] = useState<Estado[]>([]);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
@@ -56,7 +84,6 @@ export default function Data() {
     );
   }, []);
 
-  // Look up by UF sigla (what the GeoJSON exposes) AND by normalised name
   const byUF = useMemo(() => {
     const m = new Map<string, Estado>();
     estados.forEach((e) => m.set(e.uf, e));
@@ -72,118 +99,71 @@ export default function Data() {
   // ── GSAP ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Section label + heading stagger
+      // Head block — eyebrow + title stagger
       const headChildren = Array.from(headRef.current?.children ?? []);
       if (headChildren.length) {
         gsap.set(headChildren, { y: 24, autoAlpha: 0 });
-        gsap.fromTo(
-          headChildren,
-          { y: 24, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.85,
-            stagger: 0.12,
-            ease: 'power3.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: headRef.current,
-              start: 'top 85%',
-              once: true,
-            },
-          },
-        );
+        gsap.fromTo(headChildren, { y: 24, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.85, stagger: 0.12, ease: 'power3.out',
+          immediateRender: false,
+          scrollTrigger: { trigger: headRef.current, start: 'top 85%', once: true },
+        });
       }
 
-      // 57% counter — opacity only (never autoAlpha on gradient text)
+      // Stat-hero card entrance
+      if (heroRef.current) {
+        gsap.set(heroRef.current, { y: 32, autoAlpha: 0 });
+        gsap.fromTo(heroRef.current, { y: 32, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 1, ease: 'power3.out',
+          immediateRender: false,
+          scrollTrigger: { trigger: heroRef.current, start: 'top 82%', once: true },
+        });
+      }
+
+      // 68% counter — opacity only (never autoAlpha on gradient text)
       if (numberRef.current) {
         gsap.set(numberRef.current, { opacity: 0 });
         const state = { val: 0 };
-        gsap.fromTo(
-          state,
-          { val: 0 },
-          {
-            val: 68,
-            duration: 2,
-            ease: 'power2.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: numberRef.current,
-              start: 'top 85%',
-              once: true,
-              onEnter: () =>
-                gsap.to(numberRef.current, { opacity: 1, duration: 0.5 }),
-            },
-            onUpdate() {
-              if (numberRef.current)
-                numberRef.current.textContent = `${Math.round(state.val)}%`;
-            },
+        gsap.fromTo(state, { val: 0 }, {
+          val: 68, duration: 2, ease: 'power2.out', immediateRender: false,
+          scrollTrigger: {
+            trigger: heroRef.current, start: 'top 82%', once: true,
+            onEnter: () => gsap.to(numberRef.current, { opacity: 1, duration: 0.5 }),
           },
-        );
+          onUpdate() {
+            if (numberRef.current)
+              numberRef.current.textContent = `${Math.round(state.val)}%`;
+          },
+        });
       }
 
-      // Bullet stats — stagger y: 20 → 0
-      const bullets =
-        bulletsRef.current?.querySelectorAll<HTMLElement>('[data-bullet]') ?? [];
-      gsap.set(bullets, { y: 20, autoAlpha: 0 });
-      gsap.fromTo(
-        bullets,
-        { y: 20, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.7,
-          stagger: 0.1,
-          ease: 'power3.out',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: bulletsRef.current,
-            start: 'top 85%',
-            once: true,
-          },
-        },
-      );
+      // Stat chips stagger
+      const chips = chipsRef.current?.querySelectorAll('[data-chip]') ?? [];
+      gsap.set(chips, { y: 20, autoAlpha: 0 });
+      gsap.fromTo(chips, { y: 20, autoAlpha: 0 }, {
+        y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+        immediateRender: false,
+        scrollTrigger: { trigger: chipsRef.current, start: 'top 82%', once: true },
+      });
 
-      // Map fade + scale
+      // Map card
       if (mapRef.current) {
-        gsap.set(mapRef.current, { autoAlpha: 0, scale: 0.95 });
-        gsap.fromTo(
-          mapRef.current,
-          { autoAlpha: 0, scale: 0.95 },
-          {
-            autoAlpha: 1,
-            scale: 1,
-            duration: 1.1,
-            ease: 'expo.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: mapRef.current,
-              start: 'top 85%',
-              once: true,
-            },
-          },
-        );
+        gsap.set(mapRef.current, { autoAlpha: 0, scale: 0.96 });
+        gsap.fromTo(mapRef.current, { autoAlpha: 0, scale: 0.96 }, {
+          autoAlpha: 1, scale: 1, duration: 1.1, ease: 'expo.out',
+          immediateRender: false,
+          scrollTrigger: { trigger: mapRef.current, start: 'top 82%', once: true },
+        });
       }
 
       // CTA
       if (ctaRef.current) {
-        gsap.set(ctaRef.current, { y: 16, autoAlpha: 0 });
-        gsap.fromTo(
-          ctaRef.current,
-          { y: 16, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            ease: 'power3.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: ctaRef.current,
-              start: 'top 90%',
-              once: true,
-            },
-          },
-        );
+        gsap.set(ctaRef.current, { y: 14, autoAlpha: 0 });
+        gsap.fromTo(ctaRef.current, { y: 14, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out',
+          immediateRender: false,
+          scrollTrigger: { trigger: ctaRef.current, start: 'top 90%', once: true },
+        });
       }
     }, sectionRef);
 
@@ -198,11 +178,20 @@ export default function Data() {
       id="dados"
       ref={sectionRef}
       aria-labelledby="dados-heading"
-      className="py-[120px] lg:py-[140px]"
+      className="relative py-[120px] lg:py-[140px] overflow-hidden"
       style={{ backgroundColor: '#F0FAF6' }}
     >
-      <div className="container-x">
+      {/* Decorative blob */}
+      <div
+        aria-hidden="true"
+        className="absolute -z-0 left-[-8%] bottom-[10%] w-[500px] h-[400px] pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 420px 320px at center, rgba(40,168,122,0.09), transparent 70%)',
+        }}
+      />
 
+      <div className="container-x relative">
         {/* ── Section header ── */}
         <div ref={headRef} className="max-w-3xl mb-12">
           <SectionLabel>Dados</SectionLabel>
@@ -210,23 +199,35 @@ export default function Data() {
             id="dados-heading"
             className="mt-5 text-[32px] sm:text-[40px] lg:text-[44px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
           >
-            Veja como os fundos estão distribuídos pelo Brasil
+            Veja como os fundos estão{' '}
+            <em className="font-serif italic font-normal" style={{ color: '#1B8A6B' }}>
+              distribuídos pelo Brasil
+            </em>
           </h2>
         </div>
 
-        {/* ── Main grid: 2 / 5 + 3 / 5 ── */}
-        <div className="grid md:grid-cols-5 gap-10 lg:gap-14 items-center">
+        {/* ── 2-col grid ── */}
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
 
           {/* ── Left column ── */}
-          <div className="md:col-span-2 flex flex-col gap-7">
+          <div className="flex flex-col gap-6">
 
-            {/* 57% counter */}
-            <div>
+            {/* Stat-hero card — 68% contained */}
+            <div
+              ref={heroRef}
+              className="rounded-[20px] p-7"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(12,74,140,0.05) 0%, rgba(33,150,201,0.04) 100%)',
+                border: '1px solid rgba(12,74,140,0.12)',
+                boxShadow: '0 4px 20px rgba(12,74,140,0.07)',
+              }}
+            >
               <span
                 ref={numberRef}
                 className="block leading-none tracking-[-0.04em]"
                 style={{
-                  fontSize: 'clamp(72px, 11vw, 96px)',
+                  fontSize: 'clamp(64px, 10vw, 88px)',
                   fontWeight: 900,
                   background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
                   WebkitBackgroundClip: 'text',
@@ -239,77 +240,76 @@ export default function Data() {
                 0%
               </span>
               <p
-                className="mt-3 text-[16px] leading-[1.6]"
-                style={{ color: '#5F5E5A' }}
+                className="mt-3 text-[16px] leading-[1.65]"
+                style={{ color: '#4A5568' }}
               >
                 dos municípios brasileiros não captaram recursos via IRPF em
                 2025 — mesmo estando habilitados.
               </p>
             </div>
 
-            {/* Bullet stats */}
-            <div ref={bulletsRef} className="flex flex-col gap-3">
-              <div data-bullet className="flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: '#1B8A6B' }}
-                />
-                <span className="text-[14px]" style={{ color: '#2C2C2A' }}>
-                  <strong>26 estados</strong> com fundo estadual ativo
-                </span>
-              </div>
-              <div data-bullet className="flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: '#2196C9' }}
-                />
-                <span className="text-[14px]" style={{ color: '#2C2C2A' }}>
-                  <strong>2.160 municípios</strong> habilitados DIRPF
-                </span>
-              </div>
-              <div data-bullet className="flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: '#F0B429' }}
-                />
-                <span className="text-[14px]" style={{ color: '#2C2C2A' }}>
-                  <strong>R$ 153,3 milhões</strong> em doações via IRPF repassadas aos Fundos do Idoso em 2025
+            {/* Stat chips */}
+            <div ref={chipsRef} className="flex flex-col gap-2.5">
+              {CHIPS.map((chip) => (
+                <div
+                  key={chip.label}
+                  data-chip
+                  className="flex items-start gap-3.5 rounded-[14px] px-4 py-3.5 bg-white"
+                  style={{
+                    border: '1px solid rgba(0,0,0,0.07)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  }}
+                >
                   <span
-                    className="block text-[11px] mt-0.5"
-                    style={{ color: '#9CA3AF' }}
-                  >
-                    Fonte: Receita Federal · 2025
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div ref={ctaRef}>
-              <Button href="/dashboard" variant="primary" size="md">
-                Ver dashboard completo
-                <ArrowRight size={16} aria-hidden="true" />
-              </Button>
+                    aria-hidden="true"
+                    className="w-1.5 shrink-0 mt-1 rounded-full"
+                    style={{ height: '20px', backgroundColor: chip.color }}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-bold text-text-primary leading-snug">
+                      {chip.value}
+                      {chip.unit && (
+                        <span className="ml-1.5 text-[14px] font-medium">
+                          {chip.unit}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[12px] text-text-secondary mt-0.5 leading-snug">
+                      {chip.label}
+                    </p>
+                    {'note' in chip && chip.note && (
+                      <p className="text-[10px] mt-1" style={{ color: '#9CA3AF' }}>
+                        {chip.note}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* ── Right column — map ── */}
-          <div className="md:col-span-3">
+          {/* ── Right column — map preview ── */}
+          <div className="flex flex-col gap-5">
             <div
               ref={mapRef}
-              className="rounded-[20px] p-4 sm:p-5"
+              className="rounded-[20px] p-5"
               style={{
                 background: 'linear-gradient(135deg, #F0F7FF 0%, #EAF4F0 100%)',
                 boxShadow: '0 8px 32px rgba(12,74,140,0.10)',
                 border: '1px solid rgba(12,74,140,0.07)',
               }}
             >
+              {/* Preview label */}
+              <p
+                className="text-[10px] uppercase tracking-[1.2px] font-semibold mb-3 text-center"
+                style={{ color: '#9CA3AF' }}
+              >
+                Prévia — Dashboard de Fundos
+              </p>
+
               <ComposableMap
                 projection="geoMercator"
-                projectionConfig={{ scale: 700, center: [-54, -15] }}
+                projectionConfig={{ scale: 580, center: [-54, -15] }}
                 style={{
                   width: '100%',
                   height: 'auto',
@@ -320,7 +320,6 @@ export default function Data() {
                 <Geographies geography={GEO_URL}>
                   {({ geographies }: { geographies: any[] }) =>
                     geographies.map((geo) => {
-                      // Try sigla first, fall back to normalised name
                       const sigla: string = geo.properties?.sigla ?? '';
                       const geoName: string =
                         geo.properties?.name ||
@@ -358,11 +357,11 @@ export default function Data() {
                               count,
                             });
                           }}
-                          onMouseMove={(e) => {
+                          onMouseMove={(e) =>
                             setTooltip((t) =>
                               t ? { ...t, x: e.clientX + 14, y: e.clientY - 44 } : null,
-                            );
-                          }}
+                            )
+                          }
                           onMouseLeave={() => setTooltip(null)}
                           style={{
                             default: {
@@ -377,7 +376,7 @@ export default function Data() {
                               stroke: '#FFFFFF',
                               strokeWidth: 1,
                               outline: 'none',
-                              cursor: estado ? 'default' : 'default',
+                              cursor: 'default',
                             },
                             pressed: { outline: 'none' },
                           }}
@@ -388,18 +387,17 @@ export default function Data() {
                 </Geographies>
               </ComposableMap>
 
-              {/* Legend — matches dashboard style */}
+              {/* Legend */}
               <div
-                className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-2"
-                style={{ fontSize: '12px', color: '#5F5E5A' }}
+                className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-3"
+                style={{ fontSize: '11px', color: '#5F5E5A' }}
               >
-                {/* Blue volume ramp */}
                 <div className="flex flex-col gap-1 items-center">
                   <div
                     aria-hidden="true"
                     style={{
-                      width: '120px',
-                      height: '6px',
+                      width: '100px',
+                      height: '5px',
                       background:
                         'linear-gradient(to right, #B4CADF, #8FB0D2, #6A92BE, #3D6BA0, #1B4C84, #0C3057)',
                       borderRadius: '3px',
@@ -409,12 +407,10 @@ export default function Data() {
                     className="flex justify-between w-full"
                     style={{ fontSize: '9px', color: '#9CA3AF' }}
                   >
-                    <span>menos municípios</span>
+                    <span>menos</span>
                     <span>mais municípios</span>
                   </div>
                 </div>
-
-                {/* Amber swatch */}
                 <div className="inline-flex items-center gap-1.5">
                   <span
                     aria-hidden="true"
@@ -425,11 +421,19 @@ export default function Data() {
                 </div>
               </div>
             </div>
+
+            {/* CTA */}
+            <div ref={ctaRef}>
+              <Button href="/dashboard" variant="primary" size="md" className="w-full sm:w-auto">
+                Ver dashboard completo
+                <ArrowRight size={16} aria-hidden="true" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Fixed tooltip — follows mouse, outside section for correct stacking */}
+      {/* Tooltip */}
       {tooltip && (
         <div
           role="tooltip"
