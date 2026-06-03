@@ -7,6 +7,8 @@ import {
 } from 'react';
 import { geoMercator, geoBounds, geoCentroid } from 'd3-geo';
 import {
+  VOLUME_RAMP,
+  VOLUME_RAMP_HOVER,
   volumeFill,
   volumeFillHover,
   AMBER,
@@ -97,6 +99,15 @@ function dotRadius(total: number): number {
   const logMax = Math.log10(4_000_000);
   const t = Math.min(1, (Math.log10(Math.max(10, total)) - logMin) / (logMax - logMin));
   return 1.5 + t * 3.5; // 1.5 px (min) → 5 px (max)
+}
+
+// Quantile-based band index for arrecadação mode (thresholds computed at runtime)
+function bandOfArrecadacao(value: number, thresholds: number[]): number {
+  if (value <= 0 || !thresholds.length) return 0;
+  for (let i = 0; i < thresholds.length; i++) {
+    if (value < thresholds[i]) return i;
+  }
+  return VOLUME_RAMP.length - 1;
 }
 
 const GEO_URL =
@@ -973,6 +984,32 @@ export default function MapaDashboard() {
     drawCanvasRef.current(); // redraw with sized dots
   }, [arrecadacaoData]);
 
+  // ── Choropleth color mode ─────────────────────────────────────────────────────
+  const [choroplethMode, setChoroplethMode] = useState<'municipios' | 'arrecadacao'>('municipios');
+
+  // Total arrecadação IRPF 2025 per UF (municipal donations + state fund donation)
+  const arrecadacaoPerUF = useMemo<Map<string, number>>(() => {
+    if (!arrecadacaoData) return new Map();
+    const m = new Map<string, number>();
+    for (const [uf, d] of Object.entries(arrecadacaoData.porUF)) {
+      m.set(uf, (m.get(uf) ?? 0) + d.totalMunicipal);
+    }
+    for (const [uf, d] of Object.entries(arrecadacaoData.estaduais)) {
+      m.set(uf, (m.get(uf) ?? 0) + d.total);
+    }
+    return m;
+  }, [arrecadacaoData]);
+
+  // Quantile thresholds for arrecadação (5 thresholds → 6 bands, same as VOLUME_RAMP)
+  const arrecadacaoThresholds = useMemo<number[]>(() => {
+    if (!arrecadacaoPerUF.size) return [];
+    const vals = Array.from(arrecadacaoPerUF.values())
+      .filter((v) => v > 0)
+      .sort((a, b) => a - b);
+    if (vals.length < 2) return [];
+    return [1, 2, 3, 4, 5].map((i) => vals[Math.floor((i / 6) * vals.length)]);
+  }, [arrecadacaoPerUF]);
+
   // ── Municipalities overlay toggle ─────────────────────────────────────────────
   const [showMunicipios, setShowMunicipios] = useState(false);
   const showMunicipiosRef = useRef(false);
@@ -985,6 +1022,7 @@ export default function MapaDashboard() {
     name: string;
     count: number;
     status: string;
+    arrecadacaoUF?: number;
   }>({ visible: false, name: '', count: 0, status: '' });
   const [fundosTooltipPos, setFundosTooltipPos] = useState({ x: 0, y: 0 });
   const [region, setRegion] = useState<RegionKey>('Todas');
@@ -1714,11 +1752,26 @@ export default function MapaDashboard() {
                               const isVisible = uf ? visibleUFSet.has(uf) : false;
                               const isSelected = selectedUF === uf;
 
+                              // Fill: amber overrides for PL; otherwise by active mode
+                              const arrTotal =
+                                choroplethMode === 'arrecadacao'
+                                  ? (arrecadacaoPerUF.get(uf) ?? 0)
+                                  : 0;
+                              const arrBand = bandOfArrecadacao(arrTotal, arrecadacaoThresholds);
+
                               const fillDefault = isVisible && estado
-                                ? eff === 'em_tramitacao' ? AMBER : volumeFill(count)
+                                ? eff === 'em_tramitacao'
+                                  ? AMBER
+                                  : choroplethMode === 'arrecadacao'
+                                  ? VOLUME_RAMP[arrBand]
+                                  : volumeFill(count)
                                 : NEUTRAL_FILL;
                               const fillHov = isVisible && estado
-                                ? eff === 'em_tramitacao' ? AMBER_HOVER : volumeFillHover(count)
+                                ? eff === 'em_tramitacao'
+                                  ? AMBER_HOVER
+                                  : choroplethMode === 'arrecadacao'
+                                  ? VOLUME_RAMP_HOVER[arrBand]
+                                  : volumeFillHover(count)
                                 : NEUTRAL_HOVER;
 
                               return (
@@ -1735,6 +1788,7 @@ export default function MapaDashboard() {
                                       name: estado.nome ?? uf,
                                       count: estado.municipiosHabilitados,
                                       status: STATUS_LABEL[eff] ?? '',
+                                      arrecadacaoUF: arrecadacaoPerUF.get(uf) ?? 0,
                                     });
                                   }}
                                   onMouseMove={(e) =>
@@ -1803,40 +1857,71 @@ export default function MapaDashboard() {
                   </div>
                 </div>
 
-                {/* Legend */}
+                {/* Legend + choropleth mode toggle */}
                 <div
-                  className="mt-2 flex flex-wrap items-center justify-center gap-x-10 gap-y-3"
+                  className="mt-2 flex flex-col items-center gap-2"
                   style={{ fontSize: '12px', color: '#5F5E5A' }}
                 >
-                  {/* Volume ramp */}
-                  <div className="flex flex-col gap-1.5 items-center">
-                    <div
-                      aria-hidden="true"
-                      style={{
-                        width: '180px',
-                        height: '8px',
-                        background:
-                          'linear-gradient(to right, #B4CADF, #8FB0D2, #6A92BE, #3D6BA0, #1B4C84, #0C3057)',
-                        borderRadius: '4px',
-                      }}
-                    />
-                    <div
-                      className="flex justify-between w-full"
-                      style={{ fontSize: '10px', color: '#9CA3AF' }}
-                    >
-                      <span>menos municípios</span>
-                      <span>mais municípios</span>
+                  {/* Ramp + amber in one row */}
+                  <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 w-full">
+                    {/* Volume ramp */}
+                    <div className="flex flex-col gap-1.5 items-center">
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          width: '180px',
+                          height: '8px',
+                          background:
+                            'linear-gradient(to right, #B4CADF, #8FB0D2, #6A92BE, #3D6BA0, #1B4C84, #0C3057)',
+                          borderRadius: '4px',
+                        }}
+                      />
+                      <div
+                        className="flex justify-between w-full"
+                        style={{ fontSize: '10px', color: '#9CA3AF' }}
+                      >
+                        <span>
+                          {choroplethMode === 'municipios' ? 'menos municípios' : 'menor arrecadação'}
+                        </span>
+                        <span>
+                          {choroplethMode === 'municipios' ? 'mais municípios' : 'maior arrecadação (R$)'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Amber swatch — PL em tramitação */}
+                    <div className="inline-flex items-center gap-2">
+                      <span
+                        aria-hidden="true"
+                        className="inline-block w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: '#D99A2B' }}
+                      />
+                      <span>PL em tramitação</span>
                     </div>
                   </div>
 
-                  {/* Amber swatch — PL em tramitação */}
-                  <div className="inline-flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="inline-block w-3 h-3 rounded-sm"
-                      style={{ backgroundColor: '#D99A2B' }}
-                    />
-                    <span>PL em tramitação</span>
+                  {/* Choropleth mode toggle */}
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: '#9CA3AF', fontSize: '10px' }}>Colorir por:</span>
+                    {([
+                      ['municipios', 'Nº de municípios'],
+                      ['arrecadacao', 'Arrecadação (R$)'],
+                    ] as const).map(([mode, label]) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setChoroplethMode(mode)}
+                        className="px-2.5 py-0.5 rounded-pill font-medium transition-colors border"
+                        style={{
+                          fontSize: '11px',
+                          backgroundColor: choroplethMode === mode ? '#0C4A8C' : '#F7F9FC',
+                          color: choroplethMode === mode ? '#FFFFFF' : '#4A5568',
+                          borderColor: choroplethMode === mode ? '#0C4A8C' : '#D5E3F0',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </>
@@ -1879,7 +1964,13 @@ export default function MapaDashboard() {
         >
           <strong style={{ fontWeight: 600, display: 'block' }}>{fundosTooltip.name}</strong>
           <span style={{ color: '#9CB8D4' }}>{fundosTooltip.status}</span>
-          <div style={{ marginTop: 4 }}>{fundosTooltip.count} municípios habilitados</div>
+          <div style={{ marginTop: 4 }}>
+            {choroplethMode === 'municipios'
+              ? `${fundosTooltip.count} municípios habilitados`
+              : (fundosTooltip.arrecadacaoUF ?? 0) > 0
+              ? `${formatBRLCompact(fundosTooltip.arrecadacaoUF ?? 0)} via IRPF (2025)`
+              : 'R$ 0 — sem captação via IRPF em 2025'}
+          </div>
         </div>
       )}
 
