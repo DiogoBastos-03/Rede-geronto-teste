@@ -149,7 +149,7 @@ export default function Hero() {
             style={{ color: '#FFFFFF' }}
           >
             <span className="headline-text">
-              Seu município ainda não tem Fundo do Idoso. Isso tem{' '}
+              Seu município ainda não tem Fundo do Idoso? Isso tem{' '}
             </span>
             <span
               ref={solutionRef}
@@ -170,7 +170,7 @@ export default function Hero() {
           >
             Mais da metade dos municípios brasileiros ainda não criaram o Fundo
             de Direitos da Pessoa Idosa — e estão deixando de acessar milhões
-            em recursos que já existem, esperando para ser usados.
+            em recursos, que já existem, esperando para serem usados.
           </p>
 
           {/* CTAs */}

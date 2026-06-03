@@ -1,84 +1,8 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import {
-  Building,
-  Bus,
-  Home,
-  Users,
-  Heart,
-  Briefcase,
-  MessageSquare,
-  Stethoscope,
-  LucideIcon,
-} from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
-
-interface Eixo {
-  number: string;
-  title: string;
-  description: string;
-  Icon: LucideIcon;
-}
-
-const eixos: Eixo[] = [
-  {
-    number: '01',
-    title: 'Ambiente Externo e Edifícios',
-    description:
-      'Calçadas, espaços públicos e edifícios acessíveis, seguros e bem conservados. Inclui iluminação adequada, bancos em espaços públicos e banheiros acessíveis.',
-    Icon: Building,
-  },
-  {
-    number: '02',
-    title: 'Transporte',
-    description:
-      'Opções de transporte seguras, acessíveis e acessíveis financeiramente. Pontos de ônibus cobertos com bancos, veículos com piso rebaixado e tarifas reduzidas para idosos.',
-    Icon: Bus,
-  },
-  {
-    number: '03',
-    title: 'Moradia',
-    description:
-      'Habitação segura, adaptada e próxima a serviços essenciais. Programas de reforma para acessibilidade e opções de moradia assistida.',
-    Icon: Home,
-  },
-  {
-    number: '04',
-    title: 'Participação Social',
-    description:
-      'Atividades de lazer, cultura e educação acessíveis. Integração intergeracional e combate ao isolamento social.',
-    Icon: Users,
-  },
-  {
-    number: '05',
-    title: 'Respeito e Inclusão Social',
-    description:
-      'Atitudes respeitosas da comunidade, combate ao preconceito etário e valorização da experiência e sabedoria dos idosos.',
-    Icon: Heart,
-  },
-  {
-    number: '06',
-    title: 'Participação Cívica e Emprego',
-    description:
-      'Oportunidades de voluntariado, trabalho e representação política para idosos ativos.',
-    Icon: Briefcase,
-  },
-  {
-    number: '07',
-    title: 'Comunicação e Informação',
-    description:
-      'Informações acessíveis em linguagem clara, incluindo tecnologia adaptada para a terceira idade.',
-    Icon: MessageSquare,
-  },
-  {
-    number: '08',
-    title: 'Apoio Comunitário e Serviços de Saúde',
-    description:
-      'Serviços de saúde acessíveis, cuidado domiciliar, suporte social e redes de apoio para idosos com diferentes necessidades.',
-    Icon: Stethoscope,
-  },
-];
+import { EIXOS } from '../../../data/eixos';
 
 export default function Eixos() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -211,7 +135,7 @@ export default function Eixos() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6"
           role="list"
         >
-          {eixos.map(({ number, title, description, Icon }) => (
+          {EIXOS.map(({ number, title, description, items, Icon }) => (
             <li
               key={number}
               data-eixo-card
@@ -254,6 +178,22 @@ export default function Eixos() {
               <p className="text-[14px] leading-[1.6] text-text-secondary">
                 {description}
               </p>
+              <ul className="flex flex-col gap-1.5" aria-label={`Exemplos — ${title}`}>
+                {items.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-[12px] leading-snug"
+                    style={{ color: '#5F5E5A' }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-1 shrink-0 inline-block w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: '#28A87A' }}
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
         </ul>

@@ -1,48 +1,72 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Globe } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
+
+// ── Stat strip data ───────────────────────────────────────────────────────────
+
+const STATS = [
+  {
+    value: '33',
+    label: 'cidades pesquisadas pela OMS',
+  },
+  {
+    value: '8',
+    label: 'eixos de avaliação urbana',
+  },
+  {
+    value: '+1.000',
+    label: 'municípios brasileiros no BAPI',
+  },
+  {
+    value: '4',
+    label: 'fases de implementação',
+  },
+] as const;
+
+// ── Gradient text style (shared) ─────────────────────────────────────────────
+
+const gradientText = {
+  background: 'linear-gradient(135deg, #1A7A5E, #2196C9)',
+  WebkitBackgroundClip: 'text' as const,
+  WebkitTextFillColor: 'transparent' as const,
+  backgroundClip: 'text' as const,
+  display: 'inline-block' as const,
+};
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function OQueE() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const titleWrapRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const paragraphsRef = useRef<HTMLDivElement | null>(null);
-  const cardRef = useRef<HTMLDivElement | null>(null);
+  const statsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
 
     const ctx = gsap.context(() => {
-      // Title clip-path reveal — set initial state immediately, then fromTo on scroll
+      // Title clip-path reveal
       if (titleRef.current) {
-        // Hide right away so the title doesn't flash before the trigger fires
         gsap.set(titleRef.current, {
           clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
           y: 24,
         });
         gsap.fromTo(
           titleRef.current,
-          {
-            clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
-            y: 24,
-          },
+          { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)', y: 24 },
           {
             clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0 100%)',
             y: 0,
             duration: 1.1,
             ease: 'expo.out',
             immediateRender: false,
-            scrollTrigger: {
-              trigger: titleRef.current,
-              start: 'top 85%',
-              once: true,
-            },
+            scrollTrigger: { trigger: titleRef.current, start: 'top 85%', once: true },
           },
         );
       }
 
+      // Paragraphs stagger
       const paragraphs = paragraphsRef.current?.querySelectorAll('p') ?? [];
       gsap.set(paragraphs, { x: isMobile ? 0 : -30, autoAlpha: 0 });
       gsap.to(paragraphs, {
@@ -58,20 +82,21 @@ export default function OQueE() {
         },
       });
 
-      if (cardRef.current) {
-        gsap.set(cardRef.current, { scale: 0.95, autoAlpha: 0 });
-        gsap.to(cardRef.current, {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 1,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: cardRef.current,
-            start: 'top 85%',
-            once: true,
-          },
-        });
-      }
+      // Stat cards stagger
+      const statCards = statsRef.current?.querySelectorAll('[data-stat-card]') ?? [];
+      gsap.set(statCards, { y: 36, opacity: 0 });
+      gsap.to(statCards, {
+        y: 0,
+        opacity: 1,
+        duration: 0.75,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: statsRef.current,
+          start: 'top 87%',
+          once: true,
+        },
+      });
     }, sectionRef);
 
     return () => {
@@ -89,104 +114,67 @@ export default function OQueE() {
       style={{ backgroundColor: '#F0F7FF' }}
     >
       <div className="container-x">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-          {/* Text column (60%) */}
-          <div className="lg:col-span-7">
-            <SectionLabel>O conceito</SectionLabel>
-            <div
-              ref={titleWrapRef}
-              className="mt-5 overflow-hidden"
-              style={{ paddingBottom: '4px' }}
+        {/* ── Text block ── */}
+        <div className="max-w-3xl mb-12 lg:mb-16">
+          <SectionLabel>O conceito</SectionLabel>
+          <div className="mt-5 overflow-hidden" style={{ paddingBottom: '4px' }}>
+            <h2
+              ref={titleRef}
+              id="o-que-e-heading"
+              className="text-[32px] sm:text-[40px] lg:text-[44px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
             >
-              <h2
-                ref={titleRef}
-                id="o-que-e-heading"
-                className="text-[32px] sm:text-[40px] lg:text-[44px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary"
-              >
-                O que é uma Cidade Amiga do Idoso?
-              </h2>
-            </div>
-            <div
-              ref={paragraphsRef}
-              className="mt-8 space-y-5 text-[17px] leading-[1.7] text-text-secondary"
-            >
-              <p>
-                Uma Cidade Amiga do Idoso estimula o envelhecimento ativo ao
-                otimizar oportunidades para saúde, participação e segurança —
-                aumentando a qualidade de vida à medida que as pessoas
-                envelhecem.
-              </p>
-              <p>
-                Na prática, ela adapta suas estruturas e serviços para que
-                sejam acessíveis e promovam a inclusão de idosos com diferentes
-                necessidades e graus de capacidade.
-              </p>
-              <p>
-                O conceito foi desenvolvido pela Organização Mundial da Saúde a
-                partir de pesquisa realizada em 33 cidades de todas as regiões
-                do mundo. Hoje, centenas de cidades ao redor do planeta fazem
-                parte da Rede Global de Cidades Amigáveis da OMS.
-              </p>
-            </div>
+              O que é uma Cidade Amiga do Idoso?
+            </h2>
           </div>
+          <div
+            ref={paragraphsRef}
+            className="mt-8 space-y-5 text-[17px] leading-[1.7] text-text-secondary"
+          >
+            <p>
+              Uma Cidade Amiga do Idoso estimula o envelhecimento ativo ao
+              otimizar oportunidades para saúde, participação e segurança —
+              aumentando a qualidade de vida à medida que as pessoas envelhecem.
+            </p>
+            <p>
+              Na prática, ela adapta suas estruturas e serviços para que sejam
+              acessíveis e promovam a inclusão de idosos com diferentes
+              necessidades e graus de capacidade.
+            </p>
+            <p>
+              O conceito foi desenvolvido pela Organização Mundial da Saúde a
+              partir de pesquisa realizada em 33 cidades de todas as regiões do
+              mundo. Hoje, centenas de cidades ao redor do planeta fazem parte
+              da Rede Global de Cidades Amigáveis da OMS.
+            </p>
+          </div>
+        </div>
 
-          {/* Highlight card column (40%) */}
-          <div className="lg:col-span-5">
+        {/* ── Stat strip (4 cards) ── */}
+        <div
+          ref={statsRef}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5"
+        >
+          {STATS.map(({ value, label }) => (
             <div
-              ref={cardRef}
-              className="rounded-[20px] bg-white p-8 lg:p-10"
+              key={label}
+              data-stat-card
+              className="rounded-[20px] bg-white p-6 lg:p-8 flex flex-col gap-3"
               style={{
-                border: '1px solid #B5D4F4',
-                boxShadow: '0 12px 40px rgba(12,74,140,0.10)',
+                border: '1px solid rgba(12,74,140,0.08)',
+                boxShadow: '0 4px 24px rgba(12,74,140,0.06)',
               }}
             >
               <span
-                className="inline-flex w-12 h-12 rounded-full items-center justify-center mb-6"
-                style={{
-                  backgroundColor: 'rgba(12,74,140,0.08)',
-                  color: '#0C4A8C',
-                }}
-                aria-hidden="true"
+                className="leading-none tracking-[-0.04em]"
+                style={{ fontSize: '44px', fontWeight: 800, ...gradientText }}
               >
-                <Globe size={24} />
+                {value}
               </span>
-              <p
-                className="leading-none tracking-[-0.03em]"
-                style={{
-                  fontSize: '56px',
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  display: 'inline-block',
-                }}
-              >
-                33 cidades
-              </p>
-              <p className="mt-3 text-[15px] text-text-secondary leading-relaxed">
-                em todas as regiões do mundo deram origem ao conceito da OMS.
-              </p>
-              <div
-                className="my-6 h-px w-full"
-                style={{ backgroundColor: 'rgba(12,74,140,0.10)' }}
-                aria-hidden="true"
-              />
-              <p
-                className="leading-none tracking-[-0.02em]"
-                style={{
-                  fontSize: '32px',
-                  fontWeight: 700,
-                  color: '#1A7A5E',
-                }}
-              >
-                Centenas de cidades
-              </p>
-              <p className="mt-3 text-[15px] text-text-secondary leading-relaxed">
-                fazem parte hoje da Rede Global de Cidades Amigáveis da OMS.
+              <p className="text-[14px] leading-[1.5] text-text-secondary">
+                {label}
               </p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

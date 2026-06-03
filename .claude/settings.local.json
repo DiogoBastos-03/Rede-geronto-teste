@@ -67,7 +67,9 @@
       "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v3/malhas/estados/12/municipios?formato=application/vnd.geo+json&qualidade=minima\")",
       "Bash(python3 -c ' *)",
       "Bash(curl -s \"https://servicodados.ibge.gov.br/api/v3/malhas/estados/12?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=minima\")",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('types:', d.get\\('types',''\\), 'typings:', d.get\\('typings',''\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('types:', d.get\\('types',''\\), 'typings:', d.get\\('typings',''\\)\\)\")",
+      "Bash(node -e \"require\\('d3-geo'\\); console.log\\('ok'\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)[:5]\\); print\\(json.dumps\\(d['SP'], indent=2\\)\\)\")"
     ]
   }
 }

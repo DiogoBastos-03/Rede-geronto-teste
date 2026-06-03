@@ -6,7 +6,6 @@ import {
   Building2,
   ShieldCheck,
   Sparkles,
-  ArrowRight,
 } from 'lucide-react';
 import SectionLabel from '../ui/SectionLabel';
 
@@ -89,41 +88,6 @@ export default function Opportunity() {
         });
       }
 
-      // Hover behaviors per item
-      if (window.innerWidth >= 768) {
-        const items =
-          listRef.current?.querySelectorAll<HTMLLIElement>('[data-benefit]') ??
-          [];
-        items.forEach((item) => {
-          const arrow = item.querySelector('[data-arrow]');
-          const enter = () => {
-            gsap.to(arrow, {
-              x: 0,
-              autoAlpha: 1,
-              duration: 0.35,
-              ease: 'power3.out',
-            });
-            gsap.to(item, {
-              backgroundColor: 'rgba(12,74,140,0.03)',
-              duration: 0.3,
-            });
-          };
-          const leave = () => {
-            gsap.to(arrow, {
-              x: -8,
-              autoAlpha: 0,
-              duration: 0.3,
-              ease: 'power3.in',
-            });
-            gsap.to(item, {
-              backgroundColor: 'rgba(0,0,0,0)',
-              duration: 0.3,
-            });
-          };
-          item.addEventListener('pointerenter', enter);
-          item.addEventListener('pointerleave', leave);
-        });
-      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -176,13 +140,6 @@ export default function Opportunity() {
               </span>
               <span className="flex-1 text-[17px] leading-[1.5] text-text-primary">
                 {text}
-              </span>
-              <span
-                data-arrow
-                aria-hidden="true"
-                className="text-blue-deep opacity-0 -translate-x-2 inline-flex"
-              >
-                <ArrowRight size={20} />
               </span>
             </li>
           ))}

@@ -4,6 +4,7 @@ import CidadeAmigaHero from '../components/sections/cidade-amiga/CidadeAmigaHero
 import OQueE from '../components/sections/cidade-amiga/OQueE';
 import Fases from '../components/sections/cidade-amiga/Fases';
 import Eixos from '../components/sections/cidade-amiga/Eixos';
+import PilaresFundamentais from '../components/sections/cidade-amiga/PilaresFundamentais';
 import EstrategiaBAPI from '../components/sections/cidade-amiga/EstrategiaBAPI';
 import CidadeAmigaCTA from '../components/sections/cidade-amiga/CidadeAmigaCTA';
 
@@ -22,6 +23,7 @@ export default function CidadeAmiga() {
           { label: 'O que é', href: '#o-que-e' },
           { label: 'As 4 Fases', href: '#fases' },
           { label: 'Os 8 Eixos', href: '#eixos' },
+          { label: 'Pilares', href: '#pilares' },
           { label: 'Estratégia BAPI', href: '#bapi' },
         ]}
       />
@@ -30,6 +32,7 @@ export default function CidadeAmiga() {
         <OQueE />
         <Fases />
         <Eixos />
+        <PilaresFundamentais />
         <EstrategiaBAPI />
         <CidadeAmigaCTA />
       </main>

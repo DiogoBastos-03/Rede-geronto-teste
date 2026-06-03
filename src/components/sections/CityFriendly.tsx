@@ -1,15 +1,9 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { Bus, Heart, Users, Vote, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import SectionLabel from '../ui/SectionLabel';
 import Button from '../ui/Button';
-
-const pillars = [
-  { icon: Bus, label: 'Transporte acessível' },
-  { icon: Heart, label: 'Saúde próxima' },
-  { icon: Users, label: 'Espaços de convivência' },
-  { icon: Vote, label: 'Participação social' },
-];
+import { EIXOS } from '../../data/eixos';
 
 export default function CityFriendly() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -160,22 +154,22 @@ export default function CityFriendly() {
               <p className="mt-2 text-[22px] font-medium text-text-primary tracking-[-0.01em]">
                 Pilares de uma Cidade Amiga
               </p>
-              <ul className="mt-7 grid grid-cols-2 gap-3" role="list">
-                {pillars.map((p) => (
+              <ul className="mt-7 grid grid-cols-2 gap-2.5" role="list">
+                {EIXOS.map(({ number, title, Icon }) => (
                   <li
-                    key={p.label}
+                    key={number}
                     data-pillar
-                    className="flex items-center gap-3 p-4 rounded-[14px] bg-green-light cursor-default"
+                    className="flex items-center gap-2.5 p-3 rounded-[12px] bg-green-light cursor-default"
                   >
-                    <span className="inline-flex w-10 h-10 shrink-0 rounded-full bg-white items-center justify-center border border-green-border">
-                      <p.icon
-                        size={18}
+                    <span className="inline-flex w-8 h-8 shrink-0 rounded-full bg-white items-center justify-center border border-green-border">
+                      <Icon
+                        size={15}
                         className="text-green-forest"
                         aria-hidden="true"
                       />
                     </span>
-                    <span className="text-[14px] font-medium leading-tight text-text-primary">
-                      {p.label}
+                    <span className="text-[12px] font-medium leading-snug text-text-primary">
+                      {title}
                     </span>
                   </li>
                 ))}
