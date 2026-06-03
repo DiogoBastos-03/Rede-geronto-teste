@@ -968,7 +968,7 @@ export default function MapaDashboard() {
   const munProjection = useMemo(
     () =>
       geoMercator()
-        .scale(600)                              // matches Fundos ComposableMap scale=600
+        .scale(700)                              // matches Fundos ComposableMap scale=700
         .center([-54, -15] as [number, number])
         .translate([400, 300]),
     [],
@@ -1584,7 +1584,7 @@ export default function MapaDashboard() {
               <>
                 <div
                   ref={mapWrapRef}
-                  className="relative rounded-[20px] p-3 md:p-4 flex flex-col min-h-0 h-[290px] md:h-auto"
+                  className="relative rounded-[20px] p-2 md:p-3 flex flex-col min-h-0 h-[290px] md:h-auto"
                   style={{ background: '#F5F7FA', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.07)' }}
                 >
                   {/* Search + filter toolbar */}
@@ -1707,7 +1707,7 @@ export default function MapaDashboard() {
                   >
                     <ComposableMap
                       projection="geoMercator"
-                      projectionConfig={{ scale: 600, center: [-54, -15] }}
+                      projectionConfig={{ scale: 700, center: [-54, -15] }}
                       style={{
                         width: '100%',
                         height: 'auto',
