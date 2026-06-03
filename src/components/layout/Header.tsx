@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Como funciona", href: "#como-funciona" },
   { label: "Cidade Amiga", href: "#cidade-amiga" },
   { label: "Dados", href: "#dados" },
+  { label: "Recursos", href: "/#recursos" },
   { label: "Consultoria", href: "#consultoria" },
 ];
 
@@ -112,29 +113,53 @@ export default function Header() {
           aria-label="Navegação principal"
           className="hidden lg:flex items-center gap-8"
         >
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              data-nav-link
-              className="relative text-[14px] font-medium"
-              style={{
-                color: scrolled ? "#4A5568" : "rgba(255,255,255,0.9)",
-                transition: "color 0.35s ease",
-              }}
-            >
-              <span>{link.label}</span>
-              <span
-                aria-hidden="true"
-                className="nav-underline absolute left-0 -bottom-1.5 h-[2px] w-full origin-left"
+          {navLinks.map((link) =>
+            link.href.startsWith('/') ? (
+              <Link
+                key={link.href}
+                to={link.href}
+                data-nav-link
+                className="relative text-[14px] font-medium"
                 style={{
-                  transform: "scaleX(0)",
-                  backgroundColor: scrolled ? "#0C4A8C" : "rgba(255,255,255,0.85)",
-                  transition: "background-color 0.35s ease",
+                  color: scrolled ? "#4A5568" : "rgba(255,255,255,0.9)",
+                  transition: "color 0.35s ease",
                 }}
-              />
-            </a>
-          ))}
+              >
+                <span>{link.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="nav-underline absolute left-0 -bottom-1.5 h-[2px] w-full origin-left"
+                  style={{
+                    transform: "scaleX(0)",
+                    backgroundColor: scrolled ? "#0C4A8C" : "rgba(255,255,255,0.85)",
+                    transition: "background-color 0.35s ease",
+                  }}
+                />
+              </Link>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                data-nav-link
+                className="relative text-[14px] font-medium"
+                style={{
+                  color: scrolled ? "#4A5568" : "rgba(255,255,255,0.9)",
+                  transition: "color 0.35s ease",
+                }}
+              >
+                <span>{link.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="nav-underline absolute left-0 -bottom-1.5 h-[2px] w-full origin-left"
+                  style={{
+                    transform: "scaleX(0)",
+                    backgroundColor: scrolled ? "#0C4A8C" : "rgba(255,255,255,0.85)",
+                    transition: "background-color 0.35s ease",
+                  }}
+                />
+              </a>
+            )
+          )}
         </nav>
 
         {/* Desktop CTA */}
@@ -167,16 +192,27 @@ export default function Header() {
             aria-label="Navegação móvel"
             className="w-full max-w-[1280px] mx-auto px-6 py-4 flex flex-col gap-1"
           >
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="py-3 px-2 text-[15px] text-text-primary rounded-input hover:bg-blue-light"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.href.startsWith('/') ? (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  onClick={() => setOpen(false)}
+                  className="py-3 px-2 text-[15px] text-text-primary rounded-input hover:bg-blue-light"
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="py-3 px-2 text-[15px] text-text-primary rounded-input hover:bg-blue-light"
+                >
+                  {link.label}
+                </a>
+              )
+            )}
             <div className="pt-3">
               <Button
                 href="/diagnostico"

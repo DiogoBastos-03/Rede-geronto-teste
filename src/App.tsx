@@ -1,8 +1,10 @@
 import { Route, Routes } from 'react-router-dom';
+import ScrollToHash from './components/ScrollToHash';
 import Home from './pages/Home';
 import CidadeAmiga from './pages/CidadeAmiga';
 import Consultoria from './pages/Consultoria';
 import Dashboard from './pages/Dashboard';
+import Recursos from './pages/Recursos';
 
 const Placeholder = ({ title }: { title: string }) => (
   <main className="min-h-screen flex items-center justify-center bg-bg-primary px-6">
@@ -28,15 +30,18 @@ const Placeholder = ({ title }: { title: string }) => (
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToHash />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/cidade-amiga" element={<CidadeAmiga />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/diagnostico" element={<Placeholder title="Diagnóstico Gratuito" />} />
       <Route path="/consultoria" element={<Consultoria />} />
-      <Route path="/recursos" element={<Placeholder title="Biblioteca de Recursos" />} />
+      <Route path="/recursos" element={<Recursos />} />
       <Route path="/contato" element={<Placeholder title="Contato" />} />
       <Route path="*" element={<Placeholder title="Página não encontrada" />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }

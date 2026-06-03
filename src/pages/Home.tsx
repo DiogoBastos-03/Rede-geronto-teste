@@ -7,6 +7,7 @@ import CityFriendly from '../components/sections/CityFriendly';
 import Data from '../components/sections/Data';
 import HowItWorks from '../components/sections/HowItWorks';
 import Consulting from '../components/sections/Consulting';
+import RecursosTeaser from '../components/sections/RecursosTeaser';
 import FinalCTA from '../components/sections/FinalCTA';
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
         <Data />
         <HowItWorks />
         <Consulting />
+        <RecursosTeaser />
         <FinalCTA />
       </main>
       <Footer />
