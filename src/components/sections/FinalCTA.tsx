@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ArrowRight } from 'lucide-react';
 import SectionLabel from '../ui/SectionLabel';
+import { useContato } from '../../contexts/ContatoContext';
 
 const HEADLINE =
   'Descubra em 10 minutos o que falta para o seu município ter um Fundo do Idoso';
@@ -36,6 +37,7 @@ function wrapWordsPreservingMarkup(root: HTMLElement, wordClass: string) {
 }
 
 export default function FinalCTA() {
+  const { openContato } = useContato();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
   const subRef = useRef<HTMLParagraphElement | null>(null);
@@ -217,7 +219,8 @@ export default function FinalCTA() {
             </a>
             <a
               ref={secondaryRef}
-              href="/contato"
+              href="#"
+              onClick={(e) => { e.preventDefault(); openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de falar com um especialista sobre o Fundo Municipal do Idoso.' }); }}
               className="relative isolate inline-flex items-center justify-center rounded-pill px-8 min-h-[52px] py-[15px] font-medium text-[16px] cursor-pointer overflow-hidden"
               style={{ border: '2px solid rgba(255,255,255,0.85)' }}
             >

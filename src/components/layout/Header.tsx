@@ -6,12 +6,12 @@ import Button from "../ui/Button";
 import logo from "../../assets/logo.webp";
 
 const navLinks = [
-  { label: "Problema", href: "#problema" },
+  { label: "Problema",      href: "#problema" },
+  { label: "Cidade Amiga",  href: "#cidade-amiga" },
+  { label: "Dados",         href: "#dados" },
   { label: "Como funciona", href: "#como-funciona" },
-  { label: "Cidade Amiga", href: "#cidade-amiga" },
-  { label: "Dados", href: "#dados" },
-  { label: "Recursos", href: "/#recursos" },
-  { label: "Consultoria", href: "#consultoria" },
+  { label: "Consultoria",   href: "#consultoria" },
+  { label: "Recursos",      href: "/#recursos" },
 ];
 
 export default function Header() {

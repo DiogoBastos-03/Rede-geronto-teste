@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useContato } from '../../contexts/ContatoContext';
 
 export interface Recurso {
   id: number;
@@ -39,6 +39,7 @@ interface RecursoCardProps {
 }
 
 export default function RecursoCard({ recurso, compact = false }: RecursoCardProps) {
+  const { openContato } = useContato();
   const catStyle = CAT_STYLE[recurso.categoria] ?? { bg: '#F3F4F6', text: '#374151' };
   const badgeStyle = recurso.badge ? (BADGE_STYLE[recurso.badge] ?? { bg: '#F3F4F6', text: '#374151' }) : null;
 
@@ -104,13 +105,17 @@ export default function RecursoCard({ recurso, compact = false }: RecursoCardPro
             <ExternalLink size={12} aria-hidden="true" />
           </a>
         ) : (
-          <Link
-            to="/contato"
+          <button
+            type="button"
+            onClick={() => openContato({
+              tipo: 'Solicitar Consultoria',
+              mensagem: `Gostaria de solicitar o documento "${recurso.titulo}".`,
+            })}
             className="inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors"
             style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}
           >
             Solicitar
-          </Link>
+          </button>
         )}
       </div>
     </div>

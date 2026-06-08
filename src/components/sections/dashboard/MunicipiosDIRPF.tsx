@@ -11,6 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Building2, Check, Plus, Minus, Maximize } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
 import Button from '../../ui/Button';
+import { useContato } from '../../../contexts/ContatoContext';
 import { TOTAL_MUNICIPIOS_BRASIL } from './types';
 import { useMunicipios, useCoordsMap } from './useDashboardData';
 import type { MunicipioDirpf } from './types';
@@ -126,6 +127,7 @@ function StatCard({ value, label }: StatCardProps) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function MunicipiosDIRPF() {
+  const { openContato } = useContato();
   const { data, loading } = useMunicipios();
   const { data: coordsMap } = useCoordsMap();
 
@@ -348,10 +350,10 @@ export default function MunicipiosDIRPF() {
 
             {/* CTA */}
             <Button
-              href="/consultoria"
               variant="green"
               size="md"
               className="w-full"
+              onClick={() => openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de solicitar uma proposta de consultoria para implementar o Fundo Municipal do Idoso.' })}
             >
               Solicitar Proposta
               <ArrowRight size={16} aria-hidden="true" />

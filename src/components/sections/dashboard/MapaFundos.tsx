@@ -10,6 +10,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { X, ArrowRight, Building2, IdCard, MapPin } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
+import { useContato } from '../../../contexts/ContatoContext';
 import {
   Estado,
   MunicipioDirpf,
@@ -293,6 +294,7 @@ function FullPanel({
   loadingMunicipios,
   onClose,
 }: FullPanelProps) {
+  const { openContato } = useContato();
   const [tab, setTab] = useState<0 | 1>(0);
   useEffect(() => setTab(0), [estado.uf]);
 
@@ -408,8 +410,9 @@ function FullPanel({
           </div>
 
           {/* CTA */}
-          <a
-            href="/consultoria"
+          <button
+            type="button"
+            onClick={() => openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de saber mais sobre a consultoria para implementar um fundo no meu município.' })}
             className="inline-flex items-center justify-center gap-2 w-full rounded-pill px-5 py-3 text-[14px] font-medium text-white transition-shadow hover:shadow-[0_10px_28px_rgba(12,74,140,0.45)]"
             style={{
               background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
@@ -418,7 +421,7 @@ function FullPanel({
           >
             Solicitar Consultoria
             <ArrowRight size={16} aria-hidden="true" />
-          </a>
+          </button>
         </div>
 
         {/* Right — tab toggle + scrollable municipality list */}
@@ -516,6 +519,7 @@ function FullPanel({
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function MapaFundos() {
+  const { openContato } = useContato();
   const { data: estados, loading: loadingEstados } = useEstados();
   const { data: municipios, loading: loadingMunicipios } = useMunicipios();
 

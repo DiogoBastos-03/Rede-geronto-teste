@@ -6,6 +6,7 @@ import SectionLabel from '../ui/SectionLabel';
 import Button from '../ui/Button';
 import recursosData from '../../data/recursos.json';
 import type { Recurso } from './RecursoCard';
+import { useContato } from '../../contexts/ContatoContext';
 
 const { _meta, recursos } = recursosData as {
   _meta: typeof recursosData._meta;
@@ -33,6 +34,7 @@ const CAT_STYLE: Record<string, { bg: string; text: string }> = {
 
 function ShowcaseCard({ recurso, featured = false }: { recurso: Recurso; featured?: boolean }) {
   const cat = CAT_STYLE[recurso.categoria] ?? CAT_STYLE.guias;
+  const { openContato } = useContato();
   return (
     <div
       className={`flex flex-col rounded-[20px] bg-white overflow-hidden h-full ${
@@ -96,13 +98,17 @@ function ShowcaseCard({ recurso, featured = false }: { recurso: Recurso; feature
                 <ExternalLink size={12} aria-hidden="true" />
               </a>
             ) : (
-              <a
-                href="/contato"
+              <button
+                type="button"
+                onClick={() => openContato({
+                  tipo: 'Solicitar Consultoria',
+                  mensagem: `Gostaria de solicitar o documento "${recurso.titulo}".`,
+                })}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-[12px] font-medium"
                 style={{ backgroundColor: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' }}
               >
                 Solicitar
-              </a>
+              </button>
             )}
           </div>
         )}

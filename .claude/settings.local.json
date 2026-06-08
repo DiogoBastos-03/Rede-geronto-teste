@@ -70,7 +70,27 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('types:', d.get\\('types',''\\), 'typings:', d.get\\('typings',''\\)\\)\")",
       "Bash(node -e \"require\\('d3-geo'\\); console.log\\('ok'\\)\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)[:5]\\); print\\(json.dumps\\(d['SP'], indent=2\\)\\)\")",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['_meta'], indent=2, ensure_ascii=False\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['_meta'], indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(sed -n '200,235p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/FinalCTA.tsx)",
+      "Bash(sed -n '100,120p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/RecursoCard.tsx)",
+      "Bash(sed -n '330,350p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/consultoria/Formulario.tsx)",
+      "Bash(sed -n '470,495p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '905,925p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '90,120p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/RecursoCard.tsx)",
+      "Bash(sed -n '85,115p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/RecursosTeaser.tsx)",
+      "Bash(sed -n '205,245p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/FinalCTA.tsx)",
+      "Bash(sed -n '315,355p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/consultoria/Formulario.tsx)",
+      "Bash(sed -n '135,165p' /Users/diogobastos/Documents/redeGeronto/src/pages/Recursos.tsx)",
+      "Bash(sed -n '468,490p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '908,922p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '405,425p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaFundos.tsx)",
+      "Bash(sed -n '347,362p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MunicipiosDIRPF.tsx)",
+      "Bash(sed -n '460,490p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaFundos.tsx)",
+      "Bash(sed -n '460,500p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '900,940p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '775,800p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '383,400p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaDashboard.tsx)",
+      "Bash(sed -n '291,310p' /Users/diogobastos/Documents/redeGeronto/src/components/sections/dashboard/MapaFundos.tsx)"
     ]
   }
 }

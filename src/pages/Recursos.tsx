@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { CheckCircle2, Star, ArrowRight } from 'lucide-react';
+import { useContato } from '../contexts/ContatoContext';
 import PageHeader from '../components/layout/PageHeader';
 import Footer from '../components/layout/Footer';
 import RecursosHero from '../components/sections/recursos/RecursosHero';
@@ -14,6 +14,7 @@ const destaques = recursos.filter((r) => r.destaque === true);
 
 export default function Recursos() {
   const [activeTab, setActiveTab] = useState('todos');
+  const { openContato } = useContato();
 
   const filtered =
     activeTab === 'todos'
@@ -143,8 +144,9 @@ export default function Recursos() {
           >
             {_meta.ctaFinal.texto}
           </p>
-          <Link
-            to="/contato"
+          <button
+            type="button"
+            onClick={() => openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de saber mais sobre a consultoria para implementar um fundo no meu município.' })}
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[15px] font-semibold text-white transition-shadow hover:shadow-[0_12px_32px_rgba(0,0,0,0.3)]"
             style={{
               backgroundColor: 'rgba(255,255,255,0.15)',
@@ -153,7 +155,7 @@ export default function Recursos() {
           >
             {_meta.ctaFinal.botao}
             <ArrowRight size={18} aria-hidden="true" />
-          </Link>
+          </button>
         </div>
       </section>
 

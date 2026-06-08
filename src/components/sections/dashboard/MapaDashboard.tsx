@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
 import Button from '../../ui/Button';
+import { useContato } from '../../../contexts/ContatoContext';
 import {
   Estado,
   MunicipioDirpf,
@@ -380,6 +381,7 @@ interface FullPanelProps {
 }
 
 function FullPanel({ estado, municipios, loadingMunicipios, onClose }: FullPanelProps) {
+  const { openContato } = useContato();
   const [tab, setTab] = useState<0 | 1>(0);
   useEffect(() => setTab(0), [estado.uf]);
 
@@ -471,8 +473,9 @@ function FullPanel({ estado, municipios, loadingMunicipios, onClose }: FullPanel
             </div>
           </div>
 
-          <a
-            href="/consultoria"
+          <button
+            type="button"
+            onClick={() => openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de saber mais sobre a consultoria para implementar um fundo no meu município.' })}
             className="inline-flex items-center justify-center gap-2 w-full rounded-pill px-5 py-3 text-[14px] font-medium text-white transition-shadow hover:shadow-[0_10px_28px_rgba(12,74,140,0.45)]"
             style={{
               background: 'linear-gradient(135deg, #0C4A8C, #2196C9)',
@@ -481,7 +484,7 @@ function FullPanel({ estado, municipios, loadingMunicipios, onClose }: FullPanel
           >
             Solicitar Consultoria
             <ArrowRight size={16} aria-hidden="true" />
-          </a>
+          </button>
         </div>
 
         {/* Right: tab + scrollable list */}
@@ -771,6 +774,7 @@ function AttrRow({
 }
 
 function StateSidePanel({ estado, onBack, fundoDado, municipiosHabilitados }: StateSidePanelProps) {
+  const { openContato } = useContato();
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   // Entrance animation on mount
@@ -909,14 +913,15 @@ function StateSidePanel({ estado, onBack, fundoDado, municipiosHabilitados }: St
           )}
 
           {/* CTA */}
-          <a
-            href="/consultoria"
+          <button
+            type="button"
+            onClick={() => openContato({ tipo: 'Solicitar Consultoria', mensagem: 'Gostaria de saber mais sobre a consultoria para implementar um fundo no meu município.' })}
             className="inline-flex items-center justify-center gap-2 w-full rounded-pill px-4 py-2.5 text-[13px] font-medium text-white transition-shadow hover:shadow-[0_8px_24px_rgba(12,74,140,0.40)] shrink-0"
             style={{ background: 'linear-gradient(135deg, #0C4A8C, #28A87A)', boxShadow: '0 4px 14px rgba(12,74,140,0.25)' }}
           >
             Solicitar Consultoria
             <ArrowRight size={14} aria-hidden="true" />
-          </a>
+          </button>
 
           {/* Source footnote */}
           {fundoDado?.fonte && (
@@ -937,6 +942,7 @@ function StateSidePanel({ estado, onBack, fundoDado, municipiosHabilitados }: St
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function MapaDashboard() {
+  const { openContato } = useContato();
   // ── Data ─────────────────────────────────────────────────────────────────────
   const { data: estados, loading: loadingEstados } = useEstados();
   const { data: municipios, loading: loadingMunicipios } = useMunicipios();

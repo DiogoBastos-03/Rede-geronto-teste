@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Calendar, CheckCircle, ChevronDown } from 'lucide-react';
 import SectionLabel from '../../ui/SectionLabel';
+import { useContato } from '../../../contexts/ContatoContext';
+import { openWhatsApp } from '../../../utils/whatsapp';
 
 type ObjetivoOption = '' | 'Fundo do Idoso' | 'Cidade Amiga' | 'Ambos';
 
@@ -41,6 +43,7 @@ const initialState: FormState = {
 };
 
 export default function Formulario() {
+  const { openContato } = useContato();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headRef = useRef<HTMLDivElement | null>(null);
   const fieldsRef = useRef<HTMLDivElement | null>(null);
@@ -163,6 +166,23 @@ export default function Formulario() {
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
+
+    // Monta mensagem no mesmo formato do ContatoModal
+    const lines: string[] = [
+      'Olá! Vim pelo site da Rede Geronto e gostaria de solicitar uma proposta de consultoria.',
+      '',
+      `Nome: ${form.nome}`,
+      `Cargo/Função: ${form.cargo}`,
+      `E-mail: ${form.email}`,
+      `Telefone: ${form.telefone}`,
+      `Município/Estado: ${form.municipio}/${form.estado}`,
+      `Objetivo: ${form.objetivo}`,
+    ];
+    if (form.mensagem.trim()) {
+      lines.push('', 'Mensagem:', form.mensagem.trim());
+    }
+    openWhatsApp(lines.join('\n'));
+
     setSubmitted(true);
   };
 
@@ -337,7 +357,8 @@ export default function Formulario() {
 
                 <a
                   ref={altRef}
-                  href="/contato"
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); openContato({ tipo: 'Agendar Webinário', mensagem: 'Gostaria de agendar um webinário gratuito para saber mais sobre o Fundo Municipal do Idoso.' }); }}
                   className="inline-flex items-center gap-2 text-[14px] font-medium text-blue-deep hover:underline"
                 >
                   <Calendar size={16} aria-hidden="true" />
